@@ -1,0 +1,10 @@
+aws:
+  accessKey: "******"
+  secretKey: "******"
+
+dynamodb:
+  endpoint: http://localhost:4566/
+
+config:
+  base:
+    endpoint: /api/template

@@ -2,6 +2,8 @@ package co.com.nequi.usecase.person;
 
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.person.gateways.PersonService;
+import co.com.nequi.model.template.Template;
+import co.com.nequi.model.template.gateways.TemplateRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -10,6 +12,8 @@ public class PersonUseCase {
 
     private final PersonService serviceGateway;
 
+    private final TemplateRepository templateRepository;
+
     public Mono<Person> getPerson(String id) {
         return serviceGateway.getPerson(id);
     }
@@ -17,5 +21,10 @@ public class PersonUseCase {
     public Mono<Float> getBalance(String id) {
         return serviceGateway.getBalance(id);
     }
+
+    public Mono<Template> getTemplateById(String idTemplate) {
+        return this.templateRepository.getById(idTemplate).log();
+    }
+
 
 }
