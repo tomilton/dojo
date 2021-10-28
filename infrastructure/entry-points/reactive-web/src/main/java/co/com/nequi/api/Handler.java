@@ -4,6 +4,7 @@ import co.com.nequi.model.person.Person;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.usecase.person.PersonUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -26,7 +27,10 @@ public class Handler {
     }
 
     public Mono<ServerResponse> getAllTemplates(ServerRequest serverRequest) {
-        return ServerResponse.ok().body(useCase.getAllTemplates(), Template.class);
+        return ServerResponse
+                .ok()
+                .contentType(MediaType.APPLICATION_STREAM_JSON)
+                .body(useCase.getAllTemplates(), Template.class);
     }
 
 }

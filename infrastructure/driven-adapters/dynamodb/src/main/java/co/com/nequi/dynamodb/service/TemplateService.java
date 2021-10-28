@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Objects;
 
 
@@ -43,7 +44,11 @@ public class TemplateService implements TemplateRepository {
     @Override
     public Flux<Template> getAll() {
         return Flux.from(templateRepository.getAll().items())
+                .log()
+                .repeat(1)
+                .delayElements(Duration.ofSeconds(1))
                 .map(Mapper::toData)
+                .limitRate(2)
                 .onErrorReturn(new Template());
     }
 
