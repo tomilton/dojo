@@ -25,15 +25,8 @@ public class Handler {
         return ServerResponse.ok().body(useCase.getTemplateById(id), Template.class);
     }
 
-    public Mono<ServerResponse> listenGETUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().body("", String.class);
+    public Mono<ServerResponse> getAllTemplates(ServerRequest serverRequest) {
+        return ServerResponse.ok().body(useCase.getAllTemplates(), Template.class);
     }
 
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().body("", String.class);
-    }
-
-    public Mono<ServerResponse> listenPOSTUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().body("", String.class);
-    }
 }

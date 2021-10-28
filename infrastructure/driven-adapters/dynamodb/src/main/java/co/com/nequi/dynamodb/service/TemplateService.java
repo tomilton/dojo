@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+
 @Service
 public class TemplateService implements TemplateRepository {
 
@@ -41,26 +42,16 @@ public class TemplateService implements TemplateRepository {
 
     @Override
     public Flux<Template> getAll() {
-        return null;
+        return Flux.from(templateRepository.getAll().items())
+                .map(Mapper::toData)
+                .onErrorReturn(new Template());
     }
 
     @Override
     public Mono<Template> getById(final String id) {
-        /*return Mono.fromFuture(templateRepository.getByID(id))
+        return Mono.fromFuture(templateRepository.getByID(id))
                 .log()
-                // .doOnSuccess(Objects::requireNonNull)
-                .map(Mapper::toData);*/
-
-
-            return Mono.fromFuture(templateRepository.getByID(id))
-                    .flatMap(data ->{
-                        return Mono.just(data);
-                    })
-                    .doOnNext(i -> log.info("Hola: " + i.toString()))
-                    .map(Mapper::toData)
-                    .doOnSuccess(Objects::requireNonNull)
-                    .onErrorReturn(new Template());
-
-
+                .doOnSuccess(Objects::requireNonNull)
+                .map(Mapper::toData);
     }
 }
