@@ -15,6 +15,7 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(GET("/api/usecase/getPerson/{id}"), handler::getPerson)
                 .andRoute(GET("/api/usecase/getTemplate/{id}"), handler::getTemplate)
-                .andRoute(GET("/api/usecase/getAllTemplates"), handler::getAllTemplates);
+                .andRoute(GET("/api/usecase/getAllTemplates"), handler::getAllTemplates)
+                .andRoute(POST("/api/customer/createCustomer"), handler::createCustomer);
     }
 }
