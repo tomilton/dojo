@@ -13,10 +13,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CreateCustomerUseCase {
 
-
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
-
-        String object =  requestMdw.getRequestHeaderOut().getBody().getAny().toString();
 
         return Mono.just(addResponse(requestMdw));
     }

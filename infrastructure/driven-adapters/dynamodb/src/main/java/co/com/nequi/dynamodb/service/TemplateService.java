@@ -45,7 +45,7 @@ public class TemplateService implements TemplateRepository {
     public Flux<Template> getAll() {
         return Flux.from(templateRepository.getAll().items())
                 .log()
-                .repeat(1)
+                .repeat(100)
                 .delayElements(Duration.ofSeconds(1))
                 .map(Mapper::toData)
                 .limitRate(2)
