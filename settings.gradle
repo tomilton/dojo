@@ -12,3 +12,5 @@ include ':nequiservice'
 project(':nequiservice').projectDir = file('./infrastructure/driven-adapters/nequiservice')
 include ':dynamodb'
 project(':dynamodb').projectDir = file('./infrastructure/driven-adapters/dynamodb')
+include ':trace'
+project(':trace').projectDir = file('./infrastructure/driven-adapters/trace')

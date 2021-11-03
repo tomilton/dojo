@@ -1,0 +1,5 @@
+traceconfig:
+  type : logback
+logging:
+  file:
+    name: home/yefersondavila/Documentos/workspace_nequi/logAdapter.log

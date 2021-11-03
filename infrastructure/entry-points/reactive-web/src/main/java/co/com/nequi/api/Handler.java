@@ -2,6 +2,7 @@ package co.com.nequi.api;
 
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.template.Template;
+import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
 import co.com.nequi.usecase.person.PersonUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -32,5 +33,7 @@ public class Handler {
                 .contentType(MediaType.APPLICATION_STREAM_JSON)
                 .body(useCase.getAllTemplates(), Template.class);
     }
+
+
 
 }

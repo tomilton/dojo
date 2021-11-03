@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <property name="max.retention.days" value="15" />
+    <property name="max.file.size" value="10MB" />
+    <property name="log.pattern" value="%date [%-5level] [%thread] [%logger] [%file:%line] - %msg%n"/>
+
+    <appender name="TRACE_DOJO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logs.directory}/dojo.log</file>
+        <encoder>
+            <charset>utf-8</charset>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${logs.directory}/history/DOJO-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <maxHistory>${max.retention.days}</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>${max.file.size}</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+    </appender>
+    <logger name="co.com.nequi.trace" additivity="true" level="info">
+        <appender-ref ref="TRACE_DOJO" />
+    </logger>
+</Configuration>
