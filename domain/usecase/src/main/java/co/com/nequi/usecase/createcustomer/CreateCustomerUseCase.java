@@ -2,6 +2,7 @@ package co.com.nequi.usecase.createcustomer;
 
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.LiteRegistryBrokerRQ;
+import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.Body;
 import co.com.nequi.model.responsemdw.Header;
@@ -14,10 +15,15 @@ import reactor.core.publisher.Mono;
 public class CreateCustomerUseCase {
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
+        try {
 
-        Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
+            Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
+            customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
+            return Mono.just(addResponse(customer));
 
-        return Mono.just(addResponse(customer));
+        } catch (CreateCustomerException runtimeException) {
+            throw runtimeException;
+        }
     }
 
     public ResponseMdw addResponse(Object any) {
