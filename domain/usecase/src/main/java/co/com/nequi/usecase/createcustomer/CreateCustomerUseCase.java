@@ -15,7 +15,9 @@ public class CreateCustomerUseCase {
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
 
-        return Mono.just(addResponse(requestMdw));
+        Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
+
+        return Mono.just(addResponse(customer));
     }
 
     public ResponseMdw addResponse(Object any) {
