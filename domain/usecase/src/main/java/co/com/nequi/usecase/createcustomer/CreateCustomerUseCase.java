@@ -1,7 +1,6 @@
 package co.com.nequi.usecase.createcustomer;
 
 import co.com.nequi.model.customer.Customer;
-import co.com.nequi.model.customer.LiteRegistryBrokerRQ;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.Body;
@@ -19,25 +18,29 @@ public class CreateCustomerUseCase {
 
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-            return Mono.just(addResponse(customer));
+            return Mono.just(this.buildResponseMdw(customer));
 
         } catch (CreateCustomerException runtimeException) {
             throw runtimeException;
         }
     }
 
-    public ResponseMdw addResponse(Object any) {
-        ResponseMdw responseMdw = new ResponseMdw();
-        Header headerRS = new Header();
-        headerRS.setSystemID("MF-001");
-        headerRS.setMessageID("42111635389666196");
-        headerRS.setInvokerDateTime("2021-10-27 21:54:26");
-        ResponseHeaderOut responseHeaderOut = new ResponseHeaderOut();
-        responseHeaderOut.setHeader(headerRS);
-        responseMdw.setResponseHeaderOut(responseHeaderOut);
-        responseMdw.getResponseHeaderOut().setBody(new Body());
-        responseMdw.getResponseHeaderOut().getBody().setAny(any);
-        return responseMdw;
+    public ResponseMdw buildResponseMdw(Object any) {
+        Header headerRS = Header
+                .builder()
+                .systemID("MF-001")
+                .messageID("42111635389666196")
+                .invokerDateTime("2021-10-27 21:54:26")
+                .build();
+        ResponseHeaderOut responseHeaderOut = ResponseHeaderOut
+                .builder()
+                .header(headerRS)
+                .body(Body.builder().any(any).build())
+                .build();
+        return ResponseMdw.builder()
+                .responseHeaderOut(responseHeaderOut)
+                .build();
+
     }
 
 
