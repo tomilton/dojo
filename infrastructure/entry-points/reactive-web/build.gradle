@@ -4,4 +4,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.reactivecommons.utils:object-mapper-api:0.1.0'
+    implementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
 }
