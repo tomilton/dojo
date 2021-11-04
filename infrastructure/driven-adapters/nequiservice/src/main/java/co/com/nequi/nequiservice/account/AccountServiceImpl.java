@@ -3,7 +3,8 @@ package co.com.nequi.nequiservice.account;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.account.gateways.AccountService;
 import co.com.nequi.nequiservice.account.dto.FinacleResponse;
-import org.springframework.http.MediaType;
+import co.com.nequi.nequiservice.configuration.AccountOperationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,7 +18,11 @@ public class AccountServiceImpl implements AccountService {
     public Mono<Boolean> freezeAccount(FreezeAccountRqDto freezeAccountRqDto) {
         Mono<FinacleResponse> finacleResponse = webClient.post()
                 .uri("/V1/banks/1/savings/FreezeAccount")
-                .retrieve().bodyToMono(FinacleResponse.class);
+                .retrieve()
+                //.onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new AccountOperationException("Error comunicacion finacle")))
+                .bodyToMono(FinacleResponse.class)
+                .onErrorMap(throwable -> new AccountOperationException(throwable.getMessage()));
+
         return finacleResponse.map((response -> response.getData()
                 .getFreezeAccountRsCustomData().getData().getStatus().equals("SUCCESS")));
     }

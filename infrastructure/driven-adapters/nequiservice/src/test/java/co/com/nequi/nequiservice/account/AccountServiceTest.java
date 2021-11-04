@@ -5,6 +5,8 @@ import co.com.nequi.nequiservice.account.dto.FreezeAccountRs;
 import co.com.nequi.nequiservice.account.dto.FreezeAccountRsCustomData;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.nequiservice.account.dto.FreezeAccountRsCustomDataDetail;
+import co.com.nequi.nequiservice.configuration.AccountOperationException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -12,12 +14,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.function.Predicate;
+
 import static org.mockito.Mockito.when;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -27,8 +33,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @ContextConfiguration
 @ExtendWith(SpringExtension.class)
 public class AccountServiceTest {
-
-    private WebTestClient webClient;
 
     @Mock
     private WebClient webClientMock;
@@ -134,5 +138,36 @@ public class AccountServiceTest {
         Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
         StepVerifier.create(employeeMono).expectNext(Boolean.FALSE).verifyComplete();
         assertThat(employeeMono.block()).isFalse();
+    }
+
+    /**@Test
+    public void callFinacleFreezeAccountReturn5xxErrorMockito(){
+        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
+        freezeAccountRqDto.setAccountNumber("87052427983");
+        freezeAccountRqDto.setReasonCode(10);
+        freezeAccountRqDto.setFreezeCode("D");
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        //when(responseSpecMock.onStatus(HttpStatus::is5xxServerError)).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(
+                ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
+        Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
+        StepVerifier.create(employeeMono).expectError(AccountOperationException.class).verify();
+    }*/
+
+    @Test
+    public void callFinacleFreezeAccountReturnExceptionMockito(){
+        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
+        freezeAccountRqDto.setAccountNumber("87052427983");
+        freezeAccountRqDto.setReasonCode(10);
+        freezeAccountRqDto.setFreezeCode("D");
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(
+                ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
+        Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
+        StepVerifier.create(employeeMono).expectError(AccountOperationException.class).verify();
     }
 }
