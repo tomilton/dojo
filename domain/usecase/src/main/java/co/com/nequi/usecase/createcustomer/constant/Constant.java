@@ -8,6 +8,8 @@ public class Constant {
 
     public static final String COMMON_STRING_SUCCESS = "SUCCESS";
 
+    public static final String COMMON_STRING_YES = "yes";
+
     public static final String ERROR_GENERIC_CODE = COMMON_STRING_FIVE_HUNDRED;
     public static final String COMMON_STRING_SUCCESS_CODE = COMMON_STRING_ZERO;
     public static final String COMMON_STRING_SUCCESS_DESCRIPTION = COMMON_STRING_SUCCESS;

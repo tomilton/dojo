@@ -1,6 +1,7 @@
 package co.com.nequi.api;
 
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
+import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
@@ -65,7 +66,7 @@ public class Handler {
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/createCustomer"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .body(fromObject(sr))
+                        .body(fromObject(mapper.map(sr, ResponseJsonMdw.class)))
                 );
     }
 

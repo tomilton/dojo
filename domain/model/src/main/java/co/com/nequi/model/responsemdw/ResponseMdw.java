@@ -7,4 +7,5 @@ import lombok.Data;
 @Builder(toBuilder = true)
 public class ResponseMdw {
     private ResponseHeaderOut responseHeaderOut;
+    private String omitXMLDeclaration;
 }

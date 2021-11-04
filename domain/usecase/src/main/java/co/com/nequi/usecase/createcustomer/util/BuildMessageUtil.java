@@ -51,9 +51,10 @@ public class BuildMessageUtil {
                 .build();
     }
 
-    public static ResponseMdw buildResponse(ResponseHeaderOut responseHeaderOut) {
+    public static ResponseMdw buildResponse(ResponseHeaderOut responseHeaderOut, String omitXMLDeclaration) {
         return ResponseMdw.builder()
                 .responseHeaderOut(responseHeaderOut)
+                .omitXMLDeclaration(omitXMLDeclaration)
                 .build();
     }
 
