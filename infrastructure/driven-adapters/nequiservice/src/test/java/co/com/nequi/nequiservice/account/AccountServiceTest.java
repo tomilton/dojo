@@ -7,30 +7,57 @@ import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.nequiservice.account.dto.FreezeAccountRsCustomDataDetail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mock;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import static org.mockito.Mockito.when;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static reactor.core.publisher.Mono.when;
 
+@SpringBootConfiguration
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
+@ContextConfiguration
+@ExtendWith(SpringExtension.class)
 public class AccountServiceTest {
 
     private WebTestClient webClient;
+
+    @Mock
+    private WebClient webClientMock;
+    @Mock
+    private WebClient.RequestBodyUriSpec requestBodyUriSpecMock;
+
+    @Mock
+    private WebClient.RequestBodySpec requestBodySpecMock;
+
+    @SuppressWarnings("rawtypes")
+    @Mock
+    private WebClient.RequestHeadersSpec requestHeadersSpecMock;
+
+    @SuppressWarnings("rawtypes")
+    @Mock
+    private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
+
+    @Mock
+    private WebClient.ResponseSpec responseSpecMock;
+
+    @Mock
+    private Mono<FreezeAccountRs> postResponseMockFinacleFreezeAccount;
     private WebClient.RequestHeadersSpec requestHeadersMock;
 
     @InjectMocks
     private AccountServiceImpl accountServiceImpl;
 
-    @Test
-    public void callFinacleFreezeAccountReturnSuccess(){
+    //@Test
+    /**public void callFinacleFreezeAccountReturnSuccess(){
         FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
         freezeAccountRqDto.setAccountNumber("87052427983");
         freezeAccountRqDto.setReasonCode(10);
@@ -46,16 +73,66 @@ public class AccountServiceTest {
         serviceResponse.setData(freezeAccountRs);
         Mono<FinacleResponse> serviceMonoResponse = Mono.just(serviceResponse);
         webClient.post()
-                .uri("https://14829b62-d02f-4cf5-b2a8-3c0b3b8f7884.mock.pstmn.io//V1/banks/1/savings/FreezeAccount")
+                .uri("https://14829b62-d02f-4cf5-b2a8-3c0b3b8f7884.mock.pstmn.io/V1/banks/1/savings/FreezeAccount")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(freezeAccountRqDto)
                 .exchange()
                 .expectStatus()
                 .is2xxSuccessful()
                 .expectBody(FinacleResponse.class)
-                .consumeWith(re -> assertThat(re.getResponseBody().getData().getFreezeAccountRsCustomData().getData().getStatus()="SUCCESS").isEqualByComparingTo(re.getResponseBody()));
+                .consumeWith(finacleResponseEntityExchangeResult -> assertThat(finacleResponseEntityExchangeResult.getResponseBody().getData().getFreezeAccountRsCustomData().getData()).isEqualTo("SUCCESS"));
         webClient.post().accept(MediaType.APPLICATION_JSON).bodyValue(serviceResponse);
         Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
         StepVerifier.create(employeeMono).expectNext(Boolean.TRUE).verifyComplete();
+    }*/
+
+    @Test
+    public void callFinacleFreezeAccountReturnSuccessMockito(){
+        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
+        freezeAccountRqDto.setAccountNumber("87052427983");
+        freezeAccountRqDto.setReasonCode(10);
+        freezeAccountRqDto.setFreezeCode("D");
+        FinacleResponse serviceResponse = new FinacleResponse();
+        FreezeAccountRs freezeAccountRs = new FreezeAccountRs();
+        FreezeAccountRsCustomData freezeAccountRsCustomData = new FreezeAccountRsCustomData();
+        FreezeAccountRsCustomDataDetail freezeAccountRsCustomDataDetail = new FreezeAccountRsCustomDataDetail();
+        freezeAccountRsCustomDataDetail.setMessage("SUCCESS");
+        freezeAccountRsCustomDataDetail.setStatus("SUCCESS");
+        freezeAccountRsCustomData.setData(freezeAccountRsCustomDataDetail);
+        freezeAccountRs.setFreezeAccountRsCustomData(freezeAccountRsCustomData);
+        serviceResponse.setData(freezeAccountRs);
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(
+                ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.just(serviceResponse));
+        Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
+        StepVerifier.create(employeeMono).expectNext(Boolean.TRUE).verifyComplete();
+        assertThat(employeeMono.block()).isTrue();
+    }
+
+    @Test
+    public void callFinacleFreezeAccountReturnFailedMockito(){
+        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
+        freezeAccountRqDto.setAccountNumber("87052427983");
+        freezeAccountRqDto.setReasonCode(10);
+        freezeAccountRqDto.setFreezeCode("D");
+        FinacleResponse serviceResponse = new FinacleResponse();
+        FreezeAccountRs freezeAccountRs = new FreezeAccountRs();
+        FreezeAccountRsCustomData freezeAccountRsCustomData = new FreezeAccountRsCustomData();
+        FreezeAccountRsCustomDataDetail freezeAccountRsCustomDataDetail = new FreezeAccountRsCustomDataDetail();
+        freezeAccountRsCustomDataDetail.setMessage("NO SE PUDO CONGELAR LA CUENTA");
+        freezeAccountRsCustomDataDetail.setStatus("ERROR");
+        freezeAccountRsCustomData.setData(freezeAccountRsCustomDataDetail);
+        freezeAccountRs.setFreezeAccountRsCustomData(freezeAccountRsCustomData);
+        serviceResponse.setData(freezeAccountRs);
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(
+                ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.just(serviceResponse));
+        Mono<Boolean> employeeMono = accountServiceImpl.freezeAccount(freezeAccountRqDto);
+        StepVerifier.create(employeeMono).expectNext(Boolean.FALSE).verifyComplete();
+        assertThat(employeeMono.block()).isFalse();
     }
 }
