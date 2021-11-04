@@ -1,10 +1,12 @@
 package co.com.nequi.api;
 
+import co.com.nequi.api.models.CustomerDetailReq;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.usecase.createcustomer.CreateCustomerUseCase;
+import co.com.nequi.usecase.getcustomerdetail.GetCustomerDetailUseCase;
 import co.com.nequi.usecase.person.PersonUseCase;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
@@ -24,6 +26,7 @@ public class Handler {
 
     private final PersonUseCase useCase;
     private final CreateCustomerUseCase createCustomerUseCase;
+    private final GetCustomerDetailUseCase getCustomerDetailUseCase;
     private final ObjectMapper mapper;
 
     final static Logger logger = LoggerFactory.getLogger(Handler.class);
@@ -72,12 +75,12 @@ public class Handler {
                     logger.info(requestMdw.getOmitXMLDeclaration());
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-
-                    return createCustomerUseCase.createCustomer(mdw);
+                    CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
+                    return getCustomerDetailUseCase.getCustomerDetail(mdw);
                 })
                 .flatMap(sr -> ServerResponse
-                        .created(URI.create("/api/customer/createCustomer"))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .created(URI.create("/api/customer/getCustomerDetails"))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .body(fromObject(sr))
                 );
     }
