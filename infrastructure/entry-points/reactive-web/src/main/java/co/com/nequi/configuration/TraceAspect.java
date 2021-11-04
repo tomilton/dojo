@@ -1,5 +1,6 @@
 package co.com.nequi.configuration;
 
+import co.com.nequi.trace.TraceAdapter;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;

@@ -18,7 +18,6 @@ import org.springframework.test.context.TestPropertySource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootConfiguration
 @TestPropertySource(properties = {"traceconfig.type=logback"})
 @ComponentScan({"co.com.nequi.trace.configuration"})
