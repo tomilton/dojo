@@ -3,10 +3,9 @@ package co.com.nequi.usecase.createcustomer;
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestmdw.RequestMdw;
-import co.com.nequi.model.responsemdw.Body;
-import co.com.nequi.model.responsemdw.Header;
-import co.com.nequi.model.responsemdw.ResponseHeaderOut;
-import co.com.nequi.model.responsemdw.ResponseMdw;
+import co.com.nequi.model.responsemdw.*;
+import co.com.nequi.usecase.createcustomer.constant.Constant;
+import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -14,33 +13,38 @@ import reactor.core.publisher.Mono;
 public class CreateCustomerUseCase {
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
-        try {
+        ResponseMdw responseMdw;
 
+        try {
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-            return Mono.just(this.buildResponseMdw(customer));
+
+            Destination destination = BuildMessageUtil.buildDestination(
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
+
+            ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.COMMON_STRING_ZERO,
+                    Constant.COMMON_STRING_SUCCESS, "", "");
+
+            Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
+
+            ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, customer);
+
+
+
+            responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut);
+
+            return Mono.just(responseMdw);
+
 
         } catch (CreateCustomerException runtimeException) {
-            throw runtimeException;
+
+            return Mono.just(BuildMessageUtil.buildResponseMdw(runtimeException.getMessage()));
+
         }
-    }
-
-    public ResponseMdw buildResponseMdw(Object any) {
-        Header headerRS = Header
-                .builder()
-                .systemID("MF-001")
-                .messageID("42111635389666196")
-                .invokerDateTime("2021-10-27 21:54:26")
-                .build();
-        ResponseHeaderOut responseHeaderOut = ResponseHeaderOut
-                .builder()
-                .header(headerRS)
-                .body(Body.builder().any(any).build())
-                .build();
-        return ResponseMdw.builder()
-                .responseHeaderOut(responseHeaderOut)
-                .build();
-
     }
 
 
