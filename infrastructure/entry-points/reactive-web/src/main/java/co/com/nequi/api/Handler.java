@@ -1,9 +1,9 @@
 package co.com.nequi.api;
 
-
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
+import co.com.nequi.api.responsemdw.ResponseJsonMdw;
+import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.person.Person;
-
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.usecase.createcustomer.CreateCustomerUseCase;
@@ -51,6 +51,26 @@ public class Handler {
     }
 
     public Mono<ServerResponse> createCustomer(ServerRequest request) {
+        Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
+
+        return requestMdwMono
+                .flatMap(requestMdw -> {
+                    logger.info(requestMdw.getOmitXMLDeclaration());
+
+                    RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
+                    Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
+                    mdw.getRequestHeaderOut().getBody().setAny(customer);
+
+                    return createCustomerUseCase.createCustomer(mdw);
+                })
+                .flatMap(sr -> ServerResponse
+                        .created(URI.create("/api/customer/createCustomer"))
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .body(fromObject(mapper.map(sr, ResponseJsonMdw.class)))
+                );
+    }
+
+    public Mono<ServerResponse> getCustomerDetails(ServerRequest request) {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
 
         return requestMdwMono

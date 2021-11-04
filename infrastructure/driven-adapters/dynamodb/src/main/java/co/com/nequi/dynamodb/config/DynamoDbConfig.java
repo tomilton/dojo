@@ -29,7 +29,7 @@ public class DynamoDbConfig {
 
         this.dynamoEndpoint = dynamoEndpoint;
     }
-
+/*
     @Bean
     public DynamoDbAsyncClient getDynamoDbAsyncClient() {
         return DynamoDbAsyncClient.builder()
@@ -49,5 +49,5 @@ public class DynamoDbConfig {
     public DynamoDbAsyncTable<Template> getDynamoDbAsyncTemplate(DynamoDbEnhancedAsyncClient asyncClient) {
         return asyncClient.table(Template.class.getSimpleName(), TableSchema.fromBean(Template.class));
     }
-
+*/
 }
