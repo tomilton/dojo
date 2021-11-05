@@ -1,4 +1,4 @@
-package co.com.nequi.nequiservice.configuration;
+package co.com.nequi.model.exceptions;
 
 public class AccountOperationException extends RuntimeException{
     public AccountOperationException(String message) {

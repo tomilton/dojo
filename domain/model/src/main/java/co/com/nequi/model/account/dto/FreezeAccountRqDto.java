@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class FreezeAccountRqDto {
     private String accountNumber;
-    private Integer reasonCode;
+    private String reasonCode;
     private String freezeCode;
 }
