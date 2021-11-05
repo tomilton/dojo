@@ -2,6 +2,7 @@ package co.com.nequi.api;
 
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
+import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
@@ -30,8 +31,8 @@ public class AccountHandler {
         return freezeAccountRqDtoMono
                 .flatMap(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-                    Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
-                    mdw.getRequestHeaderOut().getBody().setAny(customer);
+                    FreezeAccountRqDto freezeAccountRqDto = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), FreezeAccountRqDto.class);
+                    mdw.getRequestHeaderOut().getBody().setAny(freezeAccountRqDto);
 
                     return freezeUserCase.freezeAccount(mdw);
                 })
