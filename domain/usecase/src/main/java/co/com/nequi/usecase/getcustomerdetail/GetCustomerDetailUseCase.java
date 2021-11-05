@@ -1,8 +1,11 @@
 package co.com.nequi.usecase.getcustomerdetail;
 
 import co.com.nequi.model.customer.CustomerDetailReq;
+import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.*;
+import co.com.nequi.usecase.createcustomer.constant.Constant;
+import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -10,36 +13,41 @@ import reactor.core.publisher.Mono;
 public class GetCustomerDetailUseCase {
 
     public Mono<ResponseMdw> getCustomerDetail(RequestMdw requestMdw){
-        //CustomerDetailReq customerDetailReq = (CustomerDetailReq) requestMdw.getRequestHeaderOut().getBody().getAny();
-        return Mono.just(addResponse(requestMdw));
+        ResponseMdw responseMdw;
+        CustomerDetailReq customerDetailReq = (CustomerDetailReq) requestMdw.getRequestHeaderOut().getBody().getAny();
+        /**
+         * Se construye el HEADER
+         */
+        try{
+            Destination destination = BuildMessageUtil.buildDestination(
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
+            ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.COMMON_STRING_ZERO,
+                    Constant.COMMON_STRING_SUCCESS, "", "");
+            Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
+            ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, customerDetailReq);
+            responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
+            return Mono.just(responseMdw);
+        } catch(CreateCustomerException runtimeException){
+            /**
+             * Se construye el HEADER con error
+             */
+            Destination destination = BuildMessageUtil.buildDestination(
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
+                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
+            ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.ERROR_GENERIC_CODE,
+                    Constant.COMMON_STRING_ERROR_GENERIC, runtimeException.getMessage(), "");
+            Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
+                    requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
+            ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, "");
+            responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
+            return Mono.just(responseMdw);
+        }
     }
 
-    public ResponseMdw addResponse(Object any){
-        ResponseMdw responseMdw = new ResponseMdw();
-        Header headerRS = new Header();
-        headerRS.setSystemID("MF-001");
-        headerRS.setMessageID("42111635389666196");
-        headerRS.setInvokerDateTime("2021-10-27 21:54:26");
-
-        Destination destination = new Destination();
-        destination.setName("CustomerDetails");
-        destination.setNamespace("http://co.bancaDigital/nequi/services/UserServices/CustomerDetails/v1.0");
-        destination.setOperation("getCustomerStatus");
-        headerRS.setDestination(destination);
-
-        ResponseStatus responseStatus = new ResponseStatus();
-        responseStatus.setStatusCode("0");
-        responseStatus.setStatusDesc("SUCCESS");
-        responseStatus.setErrorMessage("");
-        responseStatus.setSystem("");
-        headerRS.setResponseStatus(responseStatus);
-
-        ResponseHeaderOut responseHeaderOut = new ResponseHeaderOut();
-        responseHeaderOut.setHeader(headerRS);
-
-        responseMdw.setResponseHeaderOut(responseHeaderOut);
-        responseMdw.getResponseHeaderOut().setBody(new Body());
-        responseMdw.getResponseHeaderOut().getBody().setAny(any);
-        return responseMdw;
-    }
 }
