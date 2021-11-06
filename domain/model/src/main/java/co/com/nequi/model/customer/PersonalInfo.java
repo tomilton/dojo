@@ -2,8 +2,6 @@ package co.com.nequi.model.customer;
 
 import co.com.nequi.model.exceptions.CreateCustomerException;
 
-import java.time.LocalDate;
-
 public class PersonalInfo {
     private String name1;
     private String name2;
@@ -12,7 +10,7 @@ public class PersonalInfo {
     private String idNumber;
     private City secondIDNumber;
     private City expeditionDate;
-    private LocalDate birthDate;
+    private String birthDate;
     private String email;
     private City nickName;
     private String typeID;
@@ -21,7 +19,6 @@ public class PersonalInfo {
     private City city;
     private String state;
     private String occupation;
-
 
     /**
      * Validación de datos requeridos
@@ -88,11 +85,11 @@ public class PersonalInfo {
         this.expeditionDate = value;
     }
 
-    public LocalDate getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(LocalDate value) {
+    public void setBirthDate(String value) {
         this.birthDate = value;
     }
 

@@ -5,7 +5,7 @@ import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
-import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
+import co.com.nequi.model.responsefinacle.customer.ErrorDetail;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
@@ -21,56 +21,56 @@ public class CreateCustomerUseCase {
     private final CustomerServiceFinacle customerServiceFinacle;
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
-        ResponseMdw responseMdw;
         try {
-
-            Mono<CustomerResponseFinacle> responseFinacle = customerServiceFinacle.save(buildRequestFinacle());
-
-            responseFinacle.flatMap(finacle -> {
-                CustomerResponseFinacle customerResponseFinacle = finacle;
-                return Mono.just(finacle);
-            }).onErrorResume(error -> {
-                System.out.println(error);
-                return Mono.error(error);
-            }).subscribe();
-
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-            /**
-             * Se construye el HEADER
-             */
-            Destination destination = BuildMessageUtil.buildDestination(
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
-            ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.COMMON_STRING_ZERO,
-                    Constant.COMMON_STRING_SUCCESS, "", "");
-            Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
-                    requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
-                    requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
-            ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, customer);
-            responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
-            return Mono.just(responseMdw);
 
+            return customerServiceFinacle.save(this.buildRequestFinacle(customer))
+                    .doOnError(e ->
+                            Mono.just(this.buildResponseWithError(requestMdw, e.getMessage()))
+                    )
+                    .flatMap(finacle -> {
+                        List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
+                        if (errorDetails.isEmpty()) {
+                            return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
+                        } else {
+                            return Mono.just(this.buildResponseSucces(customer, requestMdw));
+                        }
+                    });
         } catch (CreateCustomerException runtimeException) {
-            /**
-             * Se construye el HEADER con error
-             */
-            Destination destination = BuildMessageUtil.buildDestination(
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
-                    requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
-            ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.ERROR_GENERIC_CODE,
-                    Constant.COMMON_STRING_ERROR_GENERIC, runtimeException.getMessage(), "");
-            Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
-                    requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
-                    requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
-            ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, "");
-            responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
-            return Mono.just(responseMdw);
+            return Mono.just(this.buildResponseWithError(requestMdw, runtimeException.getMessage()));
+        } catch (Exception exception) {
+            return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
         }
     }
 
+    private ResponseMdw buildResponseSucces(Customer customer, RequestMdw requestMdw) {
+        Destination destination = BuildMessageUtil.buildDestination(
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
+        ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.COMMON_STRING_ZERO,
+                Constant.COMMON_STRING_SUCCESS, "", "");
+        Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
+                requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
+                requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
+        ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, customer);
+        return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
+    }
+
+    private ResponseMdw buildResponseWithError(RequestMdw requestMdw, String error) {
+        Destination destination = BuildMessageUtil.buildDestination(
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
+                requestMdw.getRequestHeaderOut().getHeader().getDestination().getOperation());
+        ResponseStatus responseStatus = BuildMessageUtil.buildStatus(Constant.ERROR_GENERIC_CODE,
+                Constant.COMMON_STRING_ERROR_GENERIC, error, "");
+        Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
+                requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
+                requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
+        ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, "");
+        return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
+    }
 
     private List<RelationshipmanagerInfo> buildRelationshipmanagerInfo() {
         List<RelationshipmanagerInfo> infoList = new ArrayList<>();
@@ -235,7 +235,7 @@ public class CreateCustomerUseCase {
         return currencyDetails;
     }
 
-    private CustomerRequestFinacle buildRequestFinacle() {
+    private CustomerRequestFinacle buildRequestFinacle(Customer customer) {
         return CustomerRequestFinacle.builder()
                 .relationshipmanagerInfo(buildRelationshipmanagerInfo())
                 .emailDetails(buildEmailDetails())
@@ -256,9 +256,9 @@ public class CreateCustomerUseCase {
                 .taxIdentificationNumber("et aute eiusmod proident")
                 .taxExemptionCode("dolore adipisicing laboru")
                 .taxResident("enim eiusmod mollit ")
-                .firstname("sed occaecat sint anim")
-                .middlename("adipisicing nulla")
-                .lastname("eu do")
+                .firstname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName1())
+                .middlename(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName2())
+                .lastname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getLastName1())
                 .motherMaidenName("magna quis dolore")
                 .gender("culpa qui")
                 .retailSegment("tempor ut sunt es")
