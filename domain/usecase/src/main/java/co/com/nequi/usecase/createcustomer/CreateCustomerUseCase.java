@@ -32,9 +32,9 @@ public class CreateCustomerUseCase {
                     .flatMap(finacle -> {
                         List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
                         if (errorDetails.isEmpty()) {
-                            return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
-                        } else {
                             return Mono.just(this.buildResponseSucces(customer, requestMdw));
+                        } else {
+                            return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
                         }
                     });
         } catch (CreateCustomerException runtimeException) {
