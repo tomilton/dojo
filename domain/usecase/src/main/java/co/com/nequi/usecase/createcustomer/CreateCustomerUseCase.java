@@ -2,10 +2,13 @@ package co.com.nequi.usecase.createcustomer;
 
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
+import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
+import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
 import co.com.nequi.model.responsefinacle.customer.ErrorDetail;
+import co.com.nequi.model.responsefinacle.customer.Meta;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
@@ -20,16 +23,19 @@ public class CreateCustomerUseCase {
 
     private final CustomerServiceFinacle customerServiceFinacle;
 
+    private final LoggerCustomer loggerCustomer;
+
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
         try {
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
 
-            return customerServiceFinacle.save(this.buildRequestFinacle(customer))
-                    .doOnError(e ->
-                            Mono.just(this.buildResponseWithError(requestMdw, e.getMessage()))
-                    )
+            Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(this.buildRequestFinacle(customer));
+
+            return responseFinacleMono
+                    .onErrorResume((e) -> Mono.just(buildErrorFinacle("", e.getMessage())))
                     .flatMap(finacle -> {
+                        loggerCustomer.info("finacle: " + finacle);
                         List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
                         if (errorDetails.isEmpty()) {
                             return Mono.just(this.buildResponseSucces(customer, requestMdw));
@@ -42,6 +48,17 @@ public class CreateCustomerUseCase {
         } catch (Exception exception) {
             return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
         }
+    }
+
+    private CustomerResponseFinacle buildErrorFinacle(String errorcode, String errordesc) {
+        CustomerResponseFinacle customerResponseFinacle = new CustomerResponseFinacle();
+        customerResponseFinacle.setMeta(new Meta());
+        ErrorDetail errorDetail = new ErrorDetail();
+        errorDetail.setErrorcode(errorcode);
+        errorDetail.setErrordesc(errordesc);
+        customerResponseFinacle.getMeta().setErrorDetails(new ArrayList<>());
+        customerResponseFinacle.getMeta().getErrorDetails().add(errorDetail);
+        return customerResponseFinacle;
     }
 
     private ResponseMdw buildResponseSucces(Customer customer, RequestMdw requestMdw) {
