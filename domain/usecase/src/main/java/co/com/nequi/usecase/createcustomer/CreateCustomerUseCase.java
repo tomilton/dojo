@@ -33,7 +33,7 @@ public class CreateCustomerUseCase {
             Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(this.buildRequestFinacle(customer));
 
             return responseFinacleMono
-                    .onErrorResume((e) -> Mono.just(buildErrorFinacle("", e.getMessage())))
+                    .onErrorResume(e -> Mono.just(buildErrorFinacle("", e.getMessage())))
                     .flatMap(finacle -> {
                         loggerCustomer.info("finacle: " + finacle);
                         List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
