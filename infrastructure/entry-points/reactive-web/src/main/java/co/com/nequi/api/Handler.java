@@ -46,9 +46,20 @@ public class Handler {
     public Mono<ServerResponse> getAllTemplates(ServerRequest serverRequest) {
         return ServerResponse
                 .ok()
-                .contentType(MediaType.APPLICATION_STREAM_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(useCase.getAllTemplates(), Template.class)
                 .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> createTemplate(ServerRequest request) {
+        Mono<Template> requestMdwMono = request.bodyToMono(Template.class);
+        return requestMdwMono
+                .flatMap(useCase::saveTemplate)
+                .flatMap(sr -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(fromValue(sr))
+                );
     }
 
     public Mono<ServerResponse> createCustomer(ServerRequest request) {
