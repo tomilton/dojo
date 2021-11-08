@@ -54,13 +54,13 @@ public class Handler {
     public Mono<ServerResponse> createCustomer(ServerRequest request) {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
         return requestMdwMono
-                .flatMap(requestMdw -> {
-                    logger.info(requestMdw.getOmitXMLDeclaration());
+                .map(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
                     mdw.getRequestHeaderOut().getBody().setAny(customer);
-                    return createCustomerUseCase.createCustomer(mdw);
+                    return mdw;
                 })
+                .flatMap(createCustomerUseCase::createCustomer)
                 .flatMap(sr -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
