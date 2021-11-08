@@ -6,7 +6,12 @@ public class Data {
     private String cifID;
 
     @JsonProperty("cifId")
-    public String getCifID() { return cifID; }
+    public String getCifID() {
+        return cifID;
+    }
+
     @JsonProperty("cifId")
-    public void setCifID(String value) { this.cifID = value; }
+    public void setCifID(String value) {
+        this.cifID = value;
+    }
 }

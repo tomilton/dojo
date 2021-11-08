@@ -10,4 +10,4 @@ config:
     endpoint: /api/template
 
 web:
-  client: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io/V1.0/banks/1500/cif/api/Retail/create
+  client: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io
