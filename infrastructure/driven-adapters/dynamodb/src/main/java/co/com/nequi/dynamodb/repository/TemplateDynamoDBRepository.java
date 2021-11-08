@@ -10,13 +10,13 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class TemplateDynamoDBRepository {
-/*
+
     private final DynamoDbAsyncTable<Template> templateDynamoDbAsyncTable;
 
     public TemplateDynamoDBRepository(DynamoDbAsyncTable<Template> templateDynamoDbAsyncTable) {
         this.templateDynamoDbAsyncTable = templateDynamoDbAsyncTable;
     }
-*/
+
     /**
      * Se puede usar putItem
      *
@@ -24,28 +24,23 @@ public class TemplateDynamoDBRepository {
      * @return
      */
     public CompletableFuture<Template> save(Template template) {
-        return null;
-        //return templateDynamoDbAsyncTable.updateItem(template);
+        return templateDynamoDbAsyncTable.updateItem(template);
     }
 
     public CompletableFuture<Template> getByID(String templateId) {
-        return null;
-        //return templateDynamoDbAsyncTable.getItem(getKeyBuild(templateId));
+        return templateDynamoDbAsyncTable.getItem(getKeyBuild(templateId));
     }
 
     public CompletableFuture<Template> update(Template template) {
-        return null;
-        //return templateDynamoDbAsyncTable.updateItem(template);
+        return templateDynamoDbAsyncTable.updateItem(template);
     }
 
     public CompletableFuture<Template> delete(String id) {
-        return null;
-        //return templateDynamoDbAsyncTable.deleteItem(getKeyBuild(id));
+        return templateDynamoDbAsyncTable.deleteItem(getKeyBuild(id));
     }
 
     public PagePublisher<Template> getAll() {
-        return null;
-        //return templateDynamoDbAsyncTable.scan();
+        return templateDynamoDbAsyncTable.scan();
     }
 
     private Key getKeyBuild(String templateId) {
