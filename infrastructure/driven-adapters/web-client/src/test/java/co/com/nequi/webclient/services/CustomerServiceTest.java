@@ -1,10 +1,12 @@
 package co.com.nequi.webclient.services;
 
+import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
 import co.com.nequi.webclient.datos.DatosRequestFinacle;
 import co.com.nequi.webclient.datos.DatosRequestMiddleware;
 import co.com.nequi.webclient.datos.DatosResponseFinacle;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -43,6 +45,7 @@ class CustomerServiceTest {
     private CustomerServiceFinacleImpl customerServiceFinacle;
 
     @Test
+    @DisplayName("Respuesta sin errores de finacle")
     void callFinacleCreateCustomerSuccesMockito() {
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1.0/banks/1500/cif/api/Retail/create")).thenReturn(requestBodySpecMock);
@@ -60,6 +63,7 @@ class CustomerServiceTest {
 
 
     @Test
+    @DisplayName("Respuesta con errores de finacle")
     void callFinacleCreateCustomerReturnFailedMockito() {
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1.0/banks/1500/cif/api/Retail/create")).thenReturn(requestBodySpecMock);
@@ -73,6 +77,40 @@ class CustomerServiceTest {
         when(requestHeadersMock.header(any(), any())).thenReturn(requestHeadersMock);
         Mono<CustomerResponseFinacle> response = customerServiceFinacle.save(DatosRequestFinacle.buildRequestFinacle(DatosRequestMiddleware.buildCustomer()));
         StepVerifier.create(response).expectNextMatches(responseService -> !responseService.getMeta().getErrorDetails().isEmpty()).verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Respuesta con errores en el servidor de finacle")
+    void callCreateCustomerReturn5xxErrorMockito() {
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1.0/banks/1500/cif/api/Retail/create")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(ArgumentMatchers.any())).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
+        when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
+        when(requestHeadersMock.header(any(), any())).thenReturn(requestHeadersMock);
+        Mono<CustomerResponseFinacle> response = customerServiceFinacle.save(DatosRequestFinacle.buildRequestFinacle(DatosRequestMiddleware.buildCustomer()));
+        StepVerifier.create(response).expectError(CreateCustomerFinacleException.class).verify();
+    }
+
+    @Test
+    @DisplayName("Error al consultar el api de finacle")
+    void callCreateCustomerReturnExceptionMockito() {
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1.0/banks/1500/cif/api/Retail/create")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(ArgumentMatchers.any())).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
+        when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
+        when(requestHeadersMock.header(any(), any())).thenReturn(requestHeadersMock);
+        Mono<CustomerResponseFinacle> response = customerServiceFinacle.save(DatosRequestFinacle.buildRequestFinacle(DatosRequestMiddleware.buildCustomer()));
+        StepVerifier.create(response).expectError(CreateCustomerFinacleException.class).verify();
     }
 
 
