@@ -51,11 +51,29 @@ class CustomerServiceTest {
         when(requestBodySpecMock.bodyValue(ArgumentMatchers.any())).thenReturn(requestHeadersMock);
         when(requestHeadersMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
-        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON>>notNull())).thenReturn(Mono.just(DatosResponseFinacle.buildCustomerResponseJSON()));
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON>>notNull())).thenReturn(Mono.just(DatosResponseFinacle.buildCustomerResponseSuccesJSON()));
         when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
         when(requestHeadersMock.header(any(), any())).thenReturn(requestHeadersMock);
         Mono<CustomerResponseFinacle> response = customerServiceFinacle.save(DatosRequestFinacle.buildRequestFinacle(DatosRequestMiddleware.buildCustomer()));
         StepVerifier.create(response).expectNextMatches(responseService -> responseService.getMeta().getErrorDetails().isEmpty()).verifyComplete();
     }
+
+
+    @Test
+    void callFinacleCreateCustomerReturnFailedMockito() {
+        when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
+        when(requestBodyUriSpecMock.uri("/V1.0/banks/1500/cif/api/Retail/create")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(ArgumentMatchers.any())).thenReturn(requestHeadersMock);
+        when(requestHeadersMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON>>notNull())).thenReturn(Mono.just(DatosResponseFinacle.buildCustomerResponseErrorJSON()));
+        when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
+        when(requestHeadersMock.header(any(), any())).thenReturn(requestHeadersMock);
+        Mono<CustomerResponseFinacle> response = customerServiceFinacle.save(DatosRequestFinacle.buildRequestFinacle(DatosRequestMiddleware.buildCustomer()));
+        StepVerifier.create(response).expectNextMatches(responseService -> !responseService.getMeta().getErrorDetails().isEmpty()).verifyComplete();
+    }
+
 
 }
