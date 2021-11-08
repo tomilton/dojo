@@ -6,8 +6,6 @@ import co.com.nequi.trace.configuration.PropertiesConfig;
 import co.com.nequi.trace.configuration.TraceInyector;
 import co.com.nequi.trace.dto.TraceDto;
 import org.junit.jupiter.api.Test;
-//import org.junit.matchers.JUnitMatchers;
-//import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;

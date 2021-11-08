@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,6 +48,9 @@ public class AccountServiceTest {
     private WebClient.RequestHeadersUriSpec requestHeadersUriSpecMock;
 
     @Mock
+    private Answer<Object> answerMock;
+
+    @Mock
     private WebClient.ResponseSpec responseSpecMock;
 
     @Mock
@@ -73,7 +77,8 @@ public class AccountServiceTest {
         serviceResponse.setData(freezeAccountRs);
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
-        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(requestBodySpecMock.bodyValue(freezeAccountRqDto)).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
                 ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.just(serviceResponse));
@@ -98,6 +103,8 @@ public class AccountServiceTest {
         serviceResponse.setData(freezeAccountRs);
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(freezeAccountRqDto)).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
@@ -115,6 +122,8 @@ public class AccountServiceTest {
         freezeAccountRqDto.setFreezeCode("D");
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(freezeAccountRqDto)).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
@@ -131,6 +140,8 @@ public class AccountServiceTest {
         freezeAccountRqDto.setFreezeCode("D");
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.bodyValue(freezeAccountRqDto)).thenReturn(requestHeadersSpecMock);
+        when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(

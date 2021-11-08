@@ -19,6 +19,7 @@ public class AccountServiceImpl implements AccountService {
     public Mono<FreezeAccountRsService> freezeAccount(FreezeAccountRqDto freezeAccountRqDto) {
         Mono<FinacleResponse> finacleResponse = webClient.post()
                 .uri("/V1/banks/1/savings/FreezeAccount")
+                .bodyValue(freezeAccountRqDto)
                 .retrieve()
                 .onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new AccountOperationException("Error comunicacion finacle")))
                 .bodyToMono(FinacleResponse.class)

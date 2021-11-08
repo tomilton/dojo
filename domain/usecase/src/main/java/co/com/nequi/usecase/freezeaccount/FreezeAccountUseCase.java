@@ -39,7 +39,4 @@ public class FreezeAccountUseCase {
         ResponseMdw responseMdw = BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
         return responseMdw;
     }
-    Mono<Void> performAction() {
-        throw new RuntimeException();
-    }
 }
