@@ -1,7 +1,5 @@
 package co.com.nequi.model.requestmdw;
 
-import java.time.OffsetDateTime;
-
 public class Header {
     private String systemID;
     private String messageID;
