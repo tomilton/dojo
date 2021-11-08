@@ -3,6 +3,7 @@ package co.com.nequi.usecase.createcustomer;
 import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
+import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
@@ -13,6 +14,7 @@ import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -48,6 +50,17 @@ public class CreateCustomerUseCase {
         } catch (Exception exception) {
             return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
         }
+    }
+    
+    public Flux<List<CustomerDefaultData>> getDefectData(String servicioId) {
+        CustomerDefaultData build = CustomerDefaultData.builder()
+                .CustStatus("ACTVE")
+                .PrimaryRMID("SIN-ESPECIFICAR")
+                .TFPartyInd("N")
+                .build();
+        List<CustomerDefaultData> data = new ArrayList<>();
+        data.add(build);
+        return Flux.just(data);
     }
 
     private CustomerResponseFinacle buildErrorFinacle(String errorcode, String errordesc) {
