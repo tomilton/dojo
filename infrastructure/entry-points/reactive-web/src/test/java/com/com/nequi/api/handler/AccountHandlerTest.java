@@ -11,6 +11,7 @@ import co.com.nequi.api.requestmdw.Property;
 import co.com.nequi.api.requestmdw.Item;
 import co.com.nequi.api.requestmdw.Body;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
+import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.account.dto.FreezeAccountRs;
 import co.com.nequi.model.requestmdw.*;
@@ -19,30 +20,21 @@ import co.com.nequi.model.responsemdw.ResponseMdw;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ReactiveHttpInputMessage;
-import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
-import org.springframework.mock.web.reactive.function.server.MockServerRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.reactive.server.MockServerClientHttpResponse;
-import org.springframework.web.reactive.function.BodyExtractor;
-import org.springframework.web.reactive.function.BodyExtractors;
-import org.springframework.web.reactive.function.server.HandlerFunction;
-import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.function.server.support.RouterFunctionMapping;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +59,7 @@ public class AccountHandlerTest {
     private AccountHandler accountHandler;
 
     @Test
-    public void freezeAccountRequest(){
+    public void freezeAccountRequest() throws Exception {
         RequestJsonMdw requestMdw = buildRequestDefaultTest();
         ServerRequest serverRequestMock = mock(ServerRequest.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
@@ -75,8 +67,9 @@ public class AccountHandlerTest {
         when(mapper.map(any(),eq(RequestMdw.class))).thenReturn(buildRequestMdw());
         when(mapper.map(any(),eq(FreezeAccountRqDto.class))).thenReturn(buildFreezeAccountRqDto());
         when(mapper.map(any(),eq(ResponseJsonMdw.class))).thenReturn(buildResponseJsonMdwOK());
-        this.accountHandler.setMapper(mapper);
         when(freezeUserCase.freezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
+        setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
+        setFinalStaticField(AccountHandler.class, "freezeUserCase", freezeUserCase,accountHandler);
         Mono<ServerResponse> responseHandler = accountHandler.freezeAccount(serverRequestMock);
         StepVerifier.create(responseHandler)
                 .consumeNextWith(response -> {
@@ -116,11 +109,13 @@ public class AccountHandlerTest {
     }
 
     private FreezeAccountRqDto buildFreezeAccountRqDto(){
-        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
-        freezeAccountRqDto.setAccountNumber("87052427983");
-        freezeAccountRqDto.setReasonCode("10");
-        freezeAccountRqDto.setFreezeCode("D");
-        return freezeAccountRqDto;
+        FreezeAccountRqDto dtoRequest = new FreezeAccountRqDto();
+        FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
+        freezeAccountRQ.setAccountNumber("87052427983");
+        freezeAccountRQ.setReasonCode("10");
+        freezeAccountRQ.setFreezeCode("D");
+        dtoRequest.setFreezeAccountRQ(freezeAccountRQ);
+        return dtoRequest;
     }
 
     private RequestJsonMdw buildRequestDefaultTest(){
@@ -163,13 +158,21 @@ public class AccountHandlerTest {
         header.setMessageContext(messageContext);
         requestHeaderOut.setHeader(header);
         Body body = new Body();
-        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
-        freezeAccountRqDto.setAccountNumber("87052427983");
-        freezeAccountRqDto.setReasonCode("10");
-        freezeAccountRqDto.setFreezeCode("D");
-        body.setAny(freezeAccountRqDto);
+        FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
+        freezeAccountRQ.setAccountNumber("87052427983");
+        freezeAccountRQ.setReasonCode("10");
+        freezeAccountRQ.setFreezeCode("D");
+        body.setAny(freezeAccountRQ);
         requestHeaderOut.setBody(body);
         requestMdw.setRequestHeaderOut(requestHeaderOut);
         return requestMdw;
     }
+
+    private static void setFinalStaticField(Class<?> clazz, String fieldName, Object value, Object classChange)
+            throws ReflectiveOperationException {
+        Field field = clazz.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        field.set(classChange, value);
+    }
+
 }

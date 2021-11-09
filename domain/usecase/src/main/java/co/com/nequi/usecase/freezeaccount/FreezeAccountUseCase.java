@@ -1,10 +1,9 @@
 package co.com.nequi.usecase.freezeaccount;
 
-import co.com.nequi.model.account.dto.FreezeAccountRqDto;
+import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.FreezeAccountRs;
 import co.com.nequi.model.account.dto.FreezeAccountRsService;
 import co.com.nequi.model.account.gateways.AccountService;
-import co.com.nequi.model.exceptions.AccountOperationException;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
@@ -17,8 +16,8 @@ public class FreezeAccountUseCase {
     private final AccountService accountService;
 
     public Mono<ResponseMdw> freezeAccount(RequestMdw requestMdw){
-        FreezeAccountRqDto freezeAccountRqDto = (FreezeAccountRqDto) requestMdw.getRequestHeaderOut().getBody().getAny();
-        Mono<FreezeAccountRsService> responseFreezeAccount = this.accountService.freezeAccount(freezeAccountRqDto);
+        FreezeAccountRQ freezeAccountRQ = (FreezeAccountRQ) requestMdw.getRequestHeaderOut().getBody().getAny();
+        Mono<FreezeAccountRsService> responseFreezeAccount = this.accountService.freezeAccount(freezeAccountRQ);
         return responseFreezeAccount
                 .onErrorResume((e) ->  Mono.just(new FreezeAccountRsService(Boolean.FALSE, e.getMessage())) )
                 .map((res)-> res.getStatus() ? Mono.just(new FreezeAccountRs("")) : Mono.just(new FreezeAccountRs(res.getMessage())))

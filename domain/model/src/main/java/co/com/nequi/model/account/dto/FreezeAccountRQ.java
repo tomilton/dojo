@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FreezeAccountRqDto {
+public class FreezeAccountRQ {
     private String accountNumber;
     private String reasonCode;
     private String freezeCode;

@@ -30,7 +30,7 @@ public class Handler {
     private final CreateCustomerUseCase createCustomerUseCase;
     private final ObjectMapper mapper;
 
-    final static Logger logger = LoggerFactory.getLogger(Handler.class);
+    //final static Logger logger = LoggerFactory.getLogger(Handler.class);
 
     public Mono<ServerResponse> getPerson(ServerRequest serverRequest) {
         String id = serverRequest.pathVariable("id");
@@ -55,7 +55,7 @@ public class Handler {
 
         return requestMdwMono
                 .flatMap(requestMdw -> {
-                    logger.info(requestMdw.getOmitXMLDeclaration());
+                    //logger.info(requestMdw.getOmitXMLDeclaration());
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
@@ -75,7 +75,7 @@ public class Handler {
 
         return requestMdwMono
                 .flatMap(requestMdw -> {
-                    logger.info(requestMdw.getOmitXMLDeclaration());
+                    //logger.info(requestMdw.getOmitXMLDeclaration());
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
 

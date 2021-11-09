@@ -1,13 +1,12 @@
 package co.com.nequi.usecase.freezeaccount;
 
-import co.com.nequi.model.account.dto.FreezeAccountRqDto;
+import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.FreezeAccountRs;
 import co.com.nequi.model.account.dto.FreezeAccountRsService;
 import co.com.nequi.model.account.gateways.AccountService;
 import co.com.nequi.model.exceptions.AccountOperationException;
 import co.com.nequi.model.requestmdw.*;
 import co.com.nequi.model.responsemdw.ResponseMdw;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -122,11 +121,11 @@ public class FreezeAccountUseCaseTest {
         header.setMessageContext(messageContext);
         requestHeaderOut.setHeader(header);
         Body body = new Body();
-        FreezeAccountRqDto freezeAccountRqDto = new FreezeAccountRqDto();
-        freezeAccountRqDto.setAccountNumber("87052427983");
-        freezeAccountRqDto.setReasonCode("10");
-        freezeAccountRqDto.setFreezeCode("D");
-        body.setAny(freezeAccountRqDto);
+        FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
+        freezeAccountRQ.setAccountNumber("87052427983");
+        freezeAccountRQ.setReasonCode("10");
+        freezeAccountRQ.setFreezeCode("D");
+        body.setAny(freezeAccountRQ);
         requestHeaderOut.setBody(body);
         requestMdw.setRequestHeaderOut(requestHeaderOut);
         return requestMdw;

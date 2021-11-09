@@ -1,6 +1,6 @@
 package co.com.nequi.configuration;
 
-import co.com.nequi.trace.TraceAdapter;
+//import co.com.nequi.trace.TraceAdapter;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 @Aspect
 @Component
 public class TraceAspect {
-    private TraceAdapter traceAdapter;
+    //private TraceAdapter traceAdapter;
 
     @Before(value = "execution(* co.com.nequi.api.AccountHandler.*(..)) && args(serverRequest)")
     public void beforeAdvice(JoinPoint joinPoint, ServerRequest serverRequest) {

@@ -5,6 +5,7 @@ import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.http.MediaType;
@@ -20,8 +21,8 @@ import static org.springframework.web.reactive.function.BodyInserters.fromObject
 @Component
 @RequiredArgsConstructor
 public class AccountHandler {
-    private  FreezeAccountUseCase freezeUserCase;
-    private  ObjectMapper mapper;
+    private final FreezeAccountUseCase freezeUserCase;
+    private final ObjectMapper mapper;
 
     public Mono<ServerResponse> freezeAccount(ServerRequest serverRequest){
         Mono<RequestJsonMdw> freezeAccountRqDtoMono = serverRequest.bodyToMono(RequestJsonMdw.class);
@@ -29,8 +30,8 @@ public class AccountHandler {
         return freezeAccountRqDtoMono
                 .flatMap(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-                    FreezeAccountRqDto freezeAccountRqDto = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), FreezeAccountRqDto.class);
-                    mdw.getRequestHeaderOut().getBody().setAny(freezeAccountRqDto);
+                    FreezeAccountRqDto freezeAccountRQ = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), FreezeAccountRqDto.class);
+                    mdw.getRequestHeaderOut().getBody().setAny(freezeAccountRQ.getFreezeAccountRQ());
 
                     return freezeUserCase.freezeAccount(mdw);
                 })
@@ -42,7 +43,4 @@ public class AccountHandler {
                 );
     }
 
-    public void setMapper(ObjectMapper mapper){
-        this.mapper = mapper;
-    }
 }
