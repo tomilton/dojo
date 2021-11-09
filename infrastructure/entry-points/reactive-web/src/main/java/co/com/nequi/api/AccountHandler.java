@@ -4,6 +4,7 @@ import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.requestmdw.RequestMdw;
+import co.com.nequi.model.responsemdw.ResponseMdw;
 import co.com.nequi.trace.TraceAdapter;
 import co.com.nequi.trace.builder.TraceBuilder;
 import co.com.nequi.trace.dto.TraceDto;
@@ -30,18 +31,16 @@ public class AccountHandler {
     private final ObjectMapper mapper;
     @Autowired
     private final TraceAdapter traceAdapter;
-    private UUID messageIdAct;
+    private String messageIdAct;
 
     public Mono<ServerResponse> freezeAccount(ServerRequest serverRequest){
         Mono<RequestJsonMdw> freezeAccountRqDtoMono = serverRequest.bodyToMono(RequestJsonMdw.class);
-        messageIdAct = UUID.randomUUID();
         return freezeAccountRqDtoMono
                 .flatMap(requestMdw -> {
                     this.buildTrace(requestMdw,"IN");
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     FreezeAccountRqDto freezeAccountRQ = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), FreezeAccountRqDto.class);
                     mdw.getRequestHeaderOut().getBody().setAny(freezeAccountRQ.getFreezeAccountRQ());
-
                     return freezeUserCase.freezeAccount(mdw);
                 })
                 .map(object -> {
@@ -58,12 +57,19 @@ public class AccountHandler {
 
     private void buildTrace(Object object,String type){
         traceAdapter.generate(new TraceBuilder().with(traceBuilder -> {
-            traceBuilder.setMessageId(messageIdAct.toString());
             traceBuilder.setOperation(type);
             traceBuilder.setPhone("TELEFONO");
-            traceBuilder.setResponse("response");
-            traceBuilder.setRegion("region");
-            traceBuilder.setRequest(object.toString());
+            if(object instanceof ResponseMdw){
+                ResponseMdw responseMdw = (ResponseMdw) object;
+                traceBuilder.setResponse(responseMdw.toString());
+            }
+            if(object instanceof  RequestJsonMdw){
+                RequestJsonMdw requestJsonMdw = (RequestJsonMdw) object;
+                traceBuilder.setRegion(requestJsonMdw.getRequestHeaderOut().getHeader().getMessageContext().getProperty().getItem().stream().filter(pred -> pred.getKey().equals("Region")).findFirst().get().getValue());
+                traceBuilder.setRequest(requestJsonMdw.toString());
+                this.messageIdAct = requestJsonMdw.getRequestHeaderOut().getHeader().getMessageID();
+            }
+            traceBuilder.setMessageId(this.messageIdAct);
             traceBuilder.setService(this.getClass().getName());
         }).createTrace());
     }

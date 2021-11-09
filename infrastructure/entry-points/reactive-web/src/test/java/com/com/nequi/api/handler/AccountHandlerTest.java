@@ -11,7 +11,6 @@ import co.com.nequi.api.requestmdw.Property;
 import co.com.nequi.api.requestmdw.Item;
 import co.com.nequi.api.requestmdw.Body;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
-import co.com.nequi.configuration.TraceAspect;
 import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.account.dto.FreezeAccountRs;
@@ -36,7 +35,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
