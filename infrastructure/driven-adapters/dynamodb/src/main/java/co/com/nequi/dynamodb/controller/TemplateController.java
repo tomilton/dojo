@@ -20,8 +20,8 @@ public class TemplateController {
     }
 
     @GetMapping("/getTemplate/{id}")
-    public Mono<Template> getTemplate(@PathVariable() String templateId) {
-        return templateService.getById(templateId);
+    public Mono<Template> getTemplate(@PathVariable() String id) {
+        return templateService.getById(id);
     }
 
 }
