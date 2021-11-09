@@ -62,7 +62,7 @@ class TemplateControllerTest {
                     Template template = response.getResponseBody();
                     Assertions.assertThat(template.getTemplateID()).isNotEmpty();
                     Assertions.assertThat(template.getTemplateID().length() > 0).isTrue();
-                    Assertions.assertThat(template.getHttpVerb()).isEqualTo("POST");
+                    Assertions.assertThat(template.getHttpVerb()).isEqualTo("GET");
                 });
     }
 

@@ -10,7 +10,7 @@ public class DatosTemplate {
     public static Template buildTemplate() {
         Template template = new Template();
         template.setTemplateID("1");
-        template.setHttpVerb("POST");
+        template.setHttpVerb("GET");
         return template;
     }
 
