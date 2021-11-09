@@ -12,8 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -66,5 +69,19 @@ class TemplateControllerTest {
                 });
     }
 
+    @Test
+    public void getAll() {
+        when(templateService.getAll()).thenReturn(Flux.just(new Template()));
+        client.get()
+                .uri("/api/template/all")
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(Template.class)
+                .consumeWith(response -> {
+                    List<Template> templates = response.getResponseBody();
+                    Assertions.assertThat(templates.size() > 0).isTrue();
+                });
+    }
 
 }
