@@ -1,6 +1,6 @@
 package co.com.nequi.dynamodb.config;
 
-import co.com.nequi.dynamodb.entity.Template;
+import co.com.nequi.dynamodb.entity.TemplateEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -50,8 +50,8 @@ public class DynamoDbConfig implements CommandLineRunner {
     }
 
     @Bean
-    public DynamoDbAsyncTable<Template> getDynamoDbAsyncTemplate(DynamoDbEnhancedAsyncClient asyncClient) {
-        return asyncClient.table(Template.class.getSimpleName(), TableSchema.fromBean(Template.class));
+    public DynamoDbAsyncTable<TemplateEntity> getDynamoDbAsyncTemplate(DynamoDbEnhancedAsyncClient asyncClient) {
+        return asyncClient.table(TemplateEntity.class.getSimpleName(), TableSchema.fromBean(TemplateEntity.class));
     }
 
     @Override
@@ -59,8 +59,8 @@ public class DynamoDbConfig implements CommandLineRunner {
         CompletableFuture<ListTablesResponse> listTablesResponseCompletableFuture = getDynamoDbAsyncClient().listTables();
         CompletableFuture<List<String>> listCompletableFuture = listTablesResponseCompletableFuture.thenApply(ListTablesResponse::tableNames);
         listCompletableFuture.thenAccept(tables -> {
-            if (null != tables && !tables.contains(Template.class.getSimpleName())) {
-                DynamoDbAsyncTable<Template> template = getDynamoDbEnhancedAsyncClient(getDynamoDbAsyncClient()).table(Template.class.getSimpleName(), TableSchema.fromBean(Template.class));
+            if (null != tables && !tables.contains(TemplateEntity.class.getSimpleName())) {
+                DynamoDbAsyncTable<TemplateEntity> template = getDynamoDbEnhancedAsyncClient(getDynamoDbAsyncClient()).table(TemplateEntity.class.getSimpleName(), TableSchema.fromBean(TemplateEntity.class));
                 template.createTable();
             }
         });
