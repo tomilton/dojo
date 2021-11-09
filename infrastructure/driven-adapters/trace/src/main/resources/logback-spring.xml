@@ -1,17 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <property name="max.retention.days" value="15" />
     <property name="max.file.size" value="10MB" />
     <property name="log.pattern" value="%date [%-5level] [%thread] [%logger] [%file:%line] - %msg%n"/>
 
     <appender name="TRACE_DOJO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${logs.directory}/dojo.log</file>
+        <file>LOGS/DOJO.log</file>
         <encoder>
             <charset>utf-8</charset>
-            <pattern>${log.pattern}</pattern>
+            <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36}.%M - %msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${logs.directory}/history/DOJO-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>LOGS/history/DOJO-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <maxHistory>${max.retention.days}</maxHistory>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -22,4 +22,4 @@
     <logger name="co.com.nequi.trace" additivity="true" level="info">
         <appender-ref ref="TRACE_DOJO" />
     </logger>
-</Configuration>
+</configuration>

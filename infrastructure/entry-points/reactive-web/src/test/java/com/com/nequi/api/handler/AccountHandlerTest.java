@@ -11,12 +11,14 @@ import co.com.nequi.api.requestmdw.Property;
 import co.com.nequi.api.requestmdw.Item;
 import co.com.nequi.api.requestmdw.Body;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
+import co.com.nequi.configuration.TraceAspect;
 import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.FreezeAccountRqDto;
 import co.com.nequi.model.account.dto.FreezeAccountRs;
 import co.com.nequi.model.requestmdw.*;
 import co.com.nequi.model.responsemdw.ResponseHeaderOut;
 import co.com.nequi.model.responsemdw.ResponseMdw;
+import co.com.nequi.trace.TraceAdapter;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +65,7 @@ public class AccountHandlerTest {
         RequestJsonMdw requestMdw = buildRequestDefaultTest();
         ServerRequest serverRequestMock = mock(ServerRequest.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
+        TraceAdapter traceAdapter = mock(TraceAdapter.class);
         when(serverRequestMock.bodyToMono(RequestJsonMdw.class)).thenReturn(Mono.just(requestMdw));
         when(mapper.map(any(),eq(RequestMdw.class))).thenReturn(buildRequestMdw());
         when(mapper.map(any(),eq(FreezeAccountRqDto.class))).thenReturn(buildFreezeAccountRqDto());
@@ -70,6 +73,7 @@ public class AccountHandlerTest {
         when(freezeUserCase.freezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
         setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
         setFinalStaticField(AccountHandler.class, "freezeUserCase", freezeUserCase,accountHandler);
+        setFinalStaticField(AccountHandler.class, "traceAdapter", traceAdapter,accountHandler);
         Mono<ServerResponse> responseHandler = accountHandler.freezeAccount(serverRequestMock);
         StepVerifier.create(responseHandler)
                 .consumeNextWith(response -> {

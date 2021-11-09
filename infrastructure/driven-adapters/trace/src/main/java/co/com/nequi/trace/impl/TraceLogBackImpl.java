@@ -10,6 +10,7 @@ public class TraceLogBackImpl<T> implements TraceLogBack<T> {
             LoggerFactory.getLogger(this.getClass());
     @Override
     public void saveTrace(T trace) {
-        LOGGER.trace(trace.toString());
+        System.out.println("this is a save trace "+trace.toString());
+        LOGGER.info(trace.toString());
     }
 }
