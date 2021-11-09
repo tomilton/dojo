@@ -49,4 +49,22 @@ class TemplateControllerTest {
     }
 
 
+    @Test
+    public void getTemplate() {
+        when(templateService.getById(any())).thenReturn(Mono.just(DatosTemplate.buildTemplate()));
+        client.get()
+                .uri("/api/template/getTemplate/1")
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBody(Template.class)
+                .consumeWith(response -> {
+                    Template template = response.getResponseBody();
+                    Assertions.assertThat(template.getTemplateID()).isNotEmpty();
+                    Assertions.assertThat(template.getTemplateID().length() > 0).isTrue();
+                    Assertions.assertThat(template.getHttpVerb()).isEqualTo("POST");
+                });
+    }
+
+
 }

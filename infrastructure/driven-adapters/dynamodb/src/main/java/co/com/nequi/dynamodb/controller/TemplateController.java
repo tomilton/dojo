@@ -4,10 +4,7 @@ package co.com.nequi.dynamodb.controller;
 import co.com.nequi.dynamodb.service.TemplateService;
 import co.com.nequi.model.template.Template;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -20,6 +17,11 @@ public class TemplateController {
     @PostMapping("/save")
     public Mono<Template> save(@RequestBody Template template) {
         return templateService.save(template);
+    }
+
+    @GetMapping("/getTemplate/{id}")
+    public Mono<Template> getTemplate(@PathVariable() String templateId) {
+        return templateService.getById(templateId);
     }
 
 }
