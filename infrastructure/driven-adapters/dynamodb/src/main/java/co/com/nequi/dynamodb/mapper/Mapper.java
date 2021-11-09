@@ -15,7 +15,7 @@ public class Mapper {
         return mapper.map(template, TemplateEntity.class);
     }
 
-    public static co.com.nequi.model.template.Template toData(TemplateEntity templateEntity) {
+    public static Template toData(TemplateEntity templateEntity) {
         ObjectMapper mapper = new ObjectMapperImp();
         return mapper.map(templateEntity, Template.class);
     }
