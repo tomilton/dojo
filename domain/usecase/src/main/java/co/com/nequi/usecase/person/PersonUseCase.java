@@ -31,5 +31,9 @@ public class PersonUseCase {
         return this.templateRepository.getAll();
     }
 
+    public Mono<Template> saveTemplate(Template template) {
+        return this.templateRepository.save(template);
+    }
+
 
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 @DynamoDbBean
-public class Template {
+public class TemplateEntity {
 
     private String templateID;
     private TemplateOrigRQ templateOrigRQ;
