@@ -1,9 +1,9 @@
 package co.com.nequi.api;
 
-import co.com.nequi.api.models.CustomerDetailReq;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.customer.Customer;
+import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
@@ -82,6 +82,8 @@ public class Handler {
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
+
+
                     return getCustomerDetailUseCase.getCustomerDetail(mdw);
                 })
                 .flatMap(sr -> ServerResponse

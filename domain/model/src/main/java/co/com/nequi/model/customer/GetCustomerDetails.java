@@ -1,6 +1,6 @@
-package co.com.nequi.api.models;
+package co.com.nequi.model.customer;
 
-public class CustomerDetailReq {
+public class GetCustomerDetails {
 
     private String phoneNumber;
     private String document;
@@ -9,6 +9,7 @@ public class CustomerDetailReq {
     public String getPhoneNumber() {
         return phoneNumber;
     }
+
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
@@ -16,17 +17,16 @@ public class CustomerDetailReq {
     public String getDocument() {
         return document;
     }
+
     public void setDocument(String document) {
         this.document = document;
     }
 
-
     public String getBankId() {
         return bankId;
     }
+
     public void setBankId(String bankId) {
         this.bankId = bankId;
     }
-
-    
 }

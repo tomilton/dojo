@@ -2,33 +2,13 @@ package co.com.nequi.model.customer;
 
 public class CustomerDetailReq {
 
-    private String phoneNumber;
-    private String document;
-    private String bankId;
+    private GetCustomerDetails getCustomerStatusRQ;
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public GetCustomerDetails getGetCustomerStatusRQ() {
+        return getCustomerStatusRQ;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setGetCustomerStatusRQ(GetCustomerDetails getCustomerStatusRQ) {
+        this.getCustomerStatusRQ = getCustomerStatusRQ;
     }
-
-    public String getDocument() {
-        return document;
-    }
-
-    public void setDocument(String document) {
-        this.document = document;
-    }
-
-    public String getBankId() {
-        return bankId;
-    }
-
-    public void setBankId(String bankId) {
-        this.bankId = bankId;
-    }
-
-
 }
