@@ -1,11 +1,17 @@
 package co.com.nequi.webclient.services;
 
+import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.CustomerRequestFinacle;
+import co.com.nequi.model.responsefinacle.customer.CustomerDetailResponseFinacle;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
+import co.com.nequi.model.responsefinacle.customer.Meta;
+import co.com.nequi.webclient.json.customer.request.CustomerDetailRequestJSON;
 import co.com.nequi.webclient.json.customer.request.CustomerRequestJSON;
+import co.com.nequi.webclient.json.customer.request.GetCustomerDetails;
+import co.com.nequi.webclient.json.customer.response.CustomerDetailResponseJSON;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
 import org.reactivecommons.utils.ObjectMapper;
 import org.reactivecommons.utils.ObjectMapperImp;
@@ -41,6 +47,43 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
                 .bodyToMono(CustomerResponseJSON.class)
                 .onErrorMap(throwable -> new CreateCustomerFinacleException(throwable.getMessage()));
         return finacleResponse.map(obj -> objectMapper.map(obj, CustomerResponseFinacle.class));
+    }
+
+    @Override
+    public Mono<CustomerDetailResponseFinacle> getCustomerDetail(CustomerDetailReq customerDetail) {
+        CustomerDetailRequestJSON requestJSON = new CustomerDetailRequestJSON();
+
+        GetCustomerDetails getCustomerDetails = new GetCustomerDetails();
+        getCustomerDetails.setDocument(customerDetail.getGetCustomerStatusRQ().getDocument());
+        getCustomerDetails.setPhoneNumber(customerDetail.getGetCustomerStatusRQ().getPhoneNumber());
+
+        requestJSON.setGetCustomerDetails(getCustomerDetails);
+
+        Mono<CustomerDetailResponseJSON> finacleResponse = client.post()
+                .uri("/V1.0/banks/1500/savings/InquireDetails")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestJSON)
+                .retrieve()
+                .onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new Exception()))
+                .bodyToMono(CustomerDetailResponseJSON.class)
+                .onErrorMap(throwable -> new Exception());
+
+
+        finacleResponse
+                .doOnNext(f -> info(f.toString()))
+                .subscribe();
+        
+        return finacleResponse.map(obj -> {
+         CustomerDetailResponseFinacle customerDetailResponseFinacle = new CustomerDetailResponseFinacle();
+
+         Meta meta = new Meta();
+         meta.setContexturl(obj.getMeta().getContexturl());
+
+         customerDetailResponseFinacle.setMeta(meta);
+         return customerDetailResponseFinacle;
+        });
     }
 
     @Override

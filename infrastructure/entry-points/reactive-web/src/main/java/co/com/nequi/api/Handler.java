@@ -75,15 +75,15 @@ public class Handler {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
 
         return requestMdwMono
-                .flatMap(requestMdw -> {
+                .map(requestMdw -> {
                     logger.info(requestMdw.getOmitXMLDeclaration());
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
-
-
-                    return getCustomerDetailUseCase.getCustomerDetail(mdw);
+                    mdw.getRequestHeaderOut().getBody().setAny(customerDetailReq);
+                    return mdw;
                 })
+                .flatMap(getCustomerDetailUseCase::getCustomerDetail)
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/getCustomerDetails"))
                         .contentType(MediaType.APPLICATION_JSON)

@@ -11,3 +11,4 @@ config:
 
 web:
   client: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io
+  client2: https://27edff26-596c-4754-b9c1-0f37c65a4647.mock.pstmn.io
