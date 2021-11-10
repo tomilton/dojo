@@ -42,6 +42,7 @@ public class TraceAdapterTest {
     public void inyectTraceAdapterLogBackInstanceGenerateLog(){
         TraceInyector traceInyector = new TraceInyector();
         traceInyector.propertiesConfig = propertiesConfig;
+        traceInyector.typeConfig = "logback";
         TraceAdapter<TraceDto> traceLogback = traceInyector.buildTraceAdapter();
         TraceBuilder builder = new TraceBuilder();
         TraceDto trace = builder.with(traceBuilder -> {

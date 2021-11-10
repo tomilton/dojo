@@ -7,9 +7,7 @@ import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.ResponseMdw;
 import co.com.nequi.trace.TraceAdapter;
 import co.com.nequi.trace.builder.TraceBuilder;
-import co.com.nequi.trace.dto.TraceDto;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.UUID;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
@@ -29,7 +26,6 @@ import static org.springframework.web.reactive.function.BodyInserters.fromObject
 public class AccountHandler {
     private final FreezeAccountUseCase freezeUserCase;
     private final ObjectMapper mapper;
-    @Autowired
     private final TraceAdapter traceAdapter;
     private String messageIdAct;
 
