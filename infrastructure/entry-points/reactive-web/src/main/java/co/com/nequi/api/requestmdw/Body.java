@@ -1,7 +1,9 @@
 package co.com.nequi.api.requestmdw;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.ToString;
 
+@ToString
 public class Body {
     private Object any;
 

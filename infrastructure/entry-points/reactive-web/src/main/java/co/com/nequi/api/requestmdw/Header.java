@@ -1,9 +1,11 @@
 package co.com.nequi.api.requestmdw;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.ToString;
 
 import java.time.OffsetDateTime;
 
+@ToString
 public class Header {
     private String systemID;
     private String messageID;

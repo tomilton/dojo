@@ -1,3 +1,9 @@
 dependencies {
     implementation project(':model')
 }
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+}

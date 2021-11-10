@@ -1,5 +1,8 @@
 package co.com.nequi.model.requestmdw;
 
+import lombok.Data;
+import lombok.ToString;
+
 public class RequestMdw {
     private RequestHeaderOut requestHeaderOut;
     private String omitXMLDeclaration;
