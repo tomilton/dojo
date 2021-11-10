@@ -55,9 +55,8 @@ public class DynamoDbConfig implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        CompletableFuture<ListTablesResponse> listTablesResponseCompletableFuture = getDynamoDbAsyncClient().listTables();
-        CompletableFuture<List<String>> listCompletableFuture = listTablesResponseCompletableFuture.thenApply(ListTablesResponse::tableNames);
+    public void run(String... args) {
+        CompletableFuture<List<String>> listCompletableFuture = getDynamoDbAsyncClient().listTables().thenApply(ListTablesResponse::tableNames);
         listCompletableFuture.thenAccept(tables -> {
             if (null != tables && !tables.contains(TemplateEntity.class.getSimpleName())) {
                 DynamoDbAsyncTable<TemplateEntity> template = getDynamoDbEnhancedAsyncClient(getDynamoDbAsyncClient()).table(TemplateEntity.class.getSimpleName(), TableSchema.fromBean(TemplateEntity.class));
