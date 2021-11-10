@@ -1,0 +1,17 @@
+dependencies {
+    implementation project(':model')
+    implementation 'org.springframework:spring-context'
+    testImplementation(platform('org.junit:junit-bom:5.8.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.32'
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+}
+
+configurations {
+    compile.exclude module: 'spring-boot-starter-logging'
+}
