@@ -48,13 +48,7 @@ public class TemplateService implements TemplateRepository {
 
     @Override
     public Flux<Template> getAll() {
-        return Flux.from(templateRepository.getAll().items())
-                .log()
-                .repeat(100)
-                .delayElements(Duration.ofSeconds(1))
-                .map(Mapper::toData)
-                .limitRate(2)
-                .onErrorReturn(new Template());
+        return Flux.from(templateRepository.getAll().items()).log().repeat(2).delayElements(Duration.ofSeconds(1)).map(Mapper::toData).limitRate(2).onErrorReturn(new Template());
     }
 
     @Override
