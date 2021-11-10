@@ -1,4 +1,4 @@
-package co.com.nequi.dynamodb.config;
+package co.com.nequi.api.config;
 
 import org.reactivecommons.utils.ObjectMapper;
 import org.reactivecommons.utils.ObjectMapperImp;

@@ -28,17 +28,22 @@ public class TemplateService implements TemplateRepository {
     @Override
     public Mono<Template> save(Template template) {
         return Mono.fromFuture(templateRepository.save(Mapper.toEntity(template)))
-                .map(Mapper::toData);
+                .map(Mapper::toData)
+                .onErrorReturn(new Template());
     }
 
     @Override
     public Mono<Template> update(Template template) {
-        return null;
+        return Mono.fromFuture(templateRepository.update(Mapper.toEntity(template)))
+                .map(Mapper::toData)
+                .onErrorReturn(new Template());
     }
 
     @Override
     public Mono<Template> delete(String id) {
-        return null;
+        return Mono.fromFuture(templateRepository.delete(id))
+                .map(Mapper::toData)
+                .onErrorReturn(new Template());
     }
 
     @Override
@@ -57,6 +62,7 @@ public class TemplateService implements TemplateRepository {
         return Mono.fromFuture(templateRepository.getByID(id))
                 .log()
                 .doOnSuccess(Objects::requireNonNull)
-                .map(Mapper::toData);
+                .map(Mapper::toData)
+                .onErrorReturn(new Template());
     }
 }
