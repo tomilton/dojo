@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.net.URI;
 
 import static org.springframework.web.reactive.function.BodyInserters.fromObject;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +31,7 @@ public class Handler {
     private final CreateCustomerUseCase createCustomerUseCase;
     private final ObjectMapper mapper;
 
-    //final static Logger logger = LoggerFactory.getLogger(Handler.class);
+    static final Logger logger = LoggerFactory.getLogger(Handler.class);
 
     public Mono<ServerResponse> getPerson(ServerRequest serverRequest) {
         String id = serverRequest.pathVariable("id");
@@ -45,28 +46,36 @@ public class Handler {
     public Mono<ServerResponse> getAllTemplates(ServerRequest serverRequest) {
         return ServerResponse
                 .ok()
-                .contentType(MediaType.APPLICATION_STREAM_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
                 .body(useCase.getAllTemplates(), Template.class)
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
+    public Mono<ServerResponse> createTemplate(ServerRequest request) {
+        Mono<Template> requestMdwMono = request.bodyToMono(Template.class);
+        return requestMdwMono
+                .flatMap(useCase::saveTemplate)
+                .flatMap(sr -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(fromValue(sr))
+                );
+    }
+
     public Mono<ServerResponse> createCustomer(ServerRequest request) {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
-
         return requestMdwMono
-                .flatMap(requestMdw -> {
-                    //logger.info(requestMdw.getOmitXMLDeclaration());
-
+                .map(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
                     mdw.getRequestHeaderOut().getBody().setAny(customer);
-
-                    return createCustomerUseCase.createCustomer(mdw);
+                    return mdw;
                 })
+                .flatMap(createCustomerUseCase::createCustomer)
                 .flatMap(sr -> ServerResponse
-                        .created(URI.create("/api/customer/createCustomer"))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .body(fromObject(mapper.map(sr, ResponseJsonMdw.class)))
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(fromValue(mapper.map(sr, ResponseJsonMdw.class)))
                 );
     }
 
@@ -75,7 +84,7 @@ public class Handler {
 
         return requestMdwMono
                 .flatMap(requestMdw -> {
-                    //logger.info(requestMdw.getOmitXMLDeclaration());
+                    logger.info(requestMdw.getOmitXMLDeclaration());
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
 
