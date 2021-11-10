@@ -63,7 +63,6 @@ public class AccountHandlerTest {
         RequestJsonMdw requestMdw = buildRequestDefaultTest();
         ServerRequest serverRequestMock = mock(ServerRequest.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
-        TraceAdapter traceAdapter = mock(TraceAdapter.class);
         when(serverRequestMock.bodyToMono(RequestJsonMdw.class)).thenReturn(Mono.just(requestMdw));
         when(mapper.map(any(),eq(RequestMdw.class))).thenReturn(buildRequestMdw());
         when(mapper.map(any(),eq(FreezeAccountRqDto.class))).thenReturn(buildFreezeAccountRqDto());
@@ -71,7 +70,6 @@ public class AccountHandlerTest {
         when(freezeUserCase.freezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
         setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
         setFinalStaticField(AccountHandler.class, "freezeUserCase", freezeUserCase,accountHandler);
-        setFinalStaticField(AccountHandler.class, "traceAdapter", traceAdapter,accountHandler);
         Mono<ServerResponse> responseHandler = accountHandler.freezeAccount(serverRequestMock);
         StepVerifier.create(responseHandler)
                 .consumeNextWith(response -> {
