@@ -19,4 +19,4 @@ spring:
   jpa:
     databasePlatform: "org.hibernate.dialect.H2Dialect"
 traceconfig:
-  type : logback
+  type: "logback"

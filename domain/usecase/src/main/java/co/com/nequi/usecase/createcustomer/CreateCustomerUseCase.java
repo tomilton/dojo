@@ -4,6 +4,7 @@ import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
+import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
 import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
@@ -27,12 +28,16 @@ public class CreateCustomerUseCase {
 
     private final LoggerCustomer loggerCustomer;
 
+    // private final CustomerDefaultDataRepository defaultDataRepository;
+
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
         try {
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
 
             Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(this.buildRequestFinacle(customer));
+
+            // Flux<CustomerDefaultData> customerDefaultDataFlux = defaultDataRepository.getDefaultData("1");
 
             return responseFinacleMono
                     .onErrorResume(e -> Mono.just(buildErrorFinacle("", e.getMessage())))
@@ -51,17 +56,7 @@ public class CreateCustomerUseCase {
             return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
         }
     }
-    
-    public Flux<List<CustomerDefaultData>> getDefectData(String servicioId) {
-        CustomerDefaultData build = CustomerDefaultData.builder()
-                .CustStatus("ACTVE")
-                .PrimaryRMID("SIN-ESPECIFICAR")
-                .TFPartyInd("N")
-                .build();
-        List<CustomerDefaultData> data = new ArrayList<>();
-        data.add(build);
-        return Flux.just(data);
-    }
+
 
     private CustomerResponseFinacle buildErrorFinacle(String errorcode, String errordesc) {
         CustomerResponseFinacle customerResponseFinacle = new CustomerResponseFinacle();
