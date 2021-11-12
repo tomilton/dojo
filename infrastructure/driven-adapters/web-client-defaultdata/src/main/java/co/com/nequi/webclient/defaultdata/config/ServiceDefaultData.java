@@ -2,6 +2,8 @@ package co.com.nequi.webclient.defaultdata.config;
 
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
+import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
+import co.com.nequi.model.exceptions.DefaultDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,6 +28,8 @@ public class ServiceDefaultData implements CustomerDefaultDataRepository {
         params.put("id", idServicio);
         return client.build().get().uri("/api/datodefecto/{id}", params)
                 .accept(APPLICATION_JSON)
-                .retrieve().bodyToFlux(CustomerDefaultData.class);
+                .retrieve()
+                .bodyToFlux(CustomerDefaultData.class)
+                .onErrorMap(throwable -> new DefaultDataException(throwable.getMessage()));
     }
 }

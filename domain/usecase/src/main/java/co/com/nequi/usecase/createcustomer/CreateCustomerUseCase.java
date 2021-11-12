@@ -7,6 +7,7 @@ import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
 import co.com.nequi.model.exceptions.CreateCustomerException;
+import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
@@ -15,6 +16,7 @@ import co.com.nequi.model.responsefinacle.customer.Meta;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
+import co.com.nequi.model.exceptions.DefaultDataException;
 import co.com.nequi.usecase.createcustomer.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -33,42 +35,43 @@ public class CreateCustomerUseCase {
     private final CustomerDefaultDataRepository defaultDataRepository;
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
-        try {
-            Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
-            customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
 
-            return defaultDataRepository.getDefaultData("1").collectList()
-                    .flatMap(defaultData -> {
-                        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
-                        buildRequestFinacle(requestFinacle, customer, defaultData);
-                        loggerCustomer.info(".::DATOS CUSTOMER::.");
-                        return Mono.just(requestFinacle);
-                    }).flatMap(customerFinal -> {
+        Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
+        customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
 
-                        Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(customerFinal);
-                        loggerCustomer.info(".::SOLICITUD FINACLE::.");
-                        return responseFinacleMono;
-
-                    })
-                    .onErrorResume(e -> Mono.just(buildErrorFinacle("", e.getMessage())))
-                    .flatMap(responseFinacle -> {
-
-                        loggerCustomer.info(".::RESPUESTA FINACLE::.");
-
-                        List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
-                        if (errorDetails.isEmpty()) {
-                            return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
-                        } else {
-                            return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
-                        }
-
-                    });
-
-        } catch (CreateCustomerException runtimeException) {
-            return Mono.just(this.buildResponseWithError(requestMdw, runtimeException.getMessage()));
-        } catch (Exception exception) {
-            return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
-        }
+        return defaultDataRepository.getDefaultData("1").collectList()
+                .doOnNext(next -> {
+                    loggerCustomer.info(".::TRAZANDO DATOS POR DEFECTO::.");
+                })
+                .doOnError(de -> loggerCustomer.info("Error defult data: " + de.getMessage()))
+                .flatMap(defaultData -> {
+                    CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
+                    buildRequestFinacle(requestFinacle, customer, defaultData);
+                    loggerCustomer.info(".::DATOS CUSTOMER::.");
+                    return Mono.just(requestFinacle);
+                }).flatMap(customerFinal -> {
+                    Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(customerFinal);
+                    loggerCustomer.info(".::SOLICITUD FINACLE::.");
+                    return responseFinacleMono;
+                })
+                .onErrorResume(e -> {
+                    if (e instanceof CreateCustomerFinacleException) {
+                        loggerCustomer.info("CreateCustomerFinacleException: " + e.getMessage());
+                    }
+                    if (e instanceof DefaultDataException) {
+                        loggerCustomer.info("CreateCustomerFinacleException: " + e.getMessage());
+                    }
+                    return Mono.just(buildErrorFinacle("", e.getMessage()));
+                })
+                .flatMap(responseFinacle -> {
+                    loggerCustomer.info(".::RESPUESTA FINACLE::.");
+                    List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
+                    if (errorDetails.isEmpty()) {
+                        return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
+                    } else {
+                        return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
+                    }
+                });
     }
 
 
