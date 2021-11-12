@@ -1,35 +1,47 @@
 package co.com.nequi.nequiservice.account;
 
 import co.com.nequi.model.account.dto.*;
-import co.com.nequi.nequiservice.account.dto.FinacleResponse;
-import co.com.nequi.nequiservice.account.dto.FreezeAccountRs;
-import co.com.nequi.nequiservice.account.dto.FreezeAccountRsCustomData;
-import co.com.nequi.nequiservice.account.dto.FreezeAccountRsCustomDataDetail;
+import co.com.nequi.model.requestmdw.RequestMdw;
+import co.com.nequi.nequiservice.account.dto.*;
 import co.com.nequi.model.exceptions.AccountOperationException;
+import co.com.nequi.nequiservice.account.dto.FreezeAccountRs;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.lang.reflect.Field;
+
+import static co.com.nequi.nequiservice.util.Constants.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@TestPropertySource(properties = {"finacle.uri.freezeAccount=/V1/banks/{bankId}/savings/FreezeAccount",
+        "finacle.uri.unfreezeAccount=1.0/banks/{bankId}/savings/accounts/{account}/freeze"})
 @SpringBootConfiguration
+@ComponentScan({"co.com.nequi.nequiservice.configuration"})
 @SpringBootTest
 @ContextConfiguration
 @ExtendWith(SpringExtension.class)
+@PropertySource("classpath:application.properties")
 public class AccountServiceTest {
 
     @Mock
@@ -56,6 +68,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleFreezeAccountReturnSuccessMockito(){
+        accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -63,14 +76,19 @@ public class AccountServiceTest {
         FinacleResponse serviceResponse = new FinacleResponse();
         FreezeAccountRs freezeAccountRs = new FreezeAccountRs();
         FreezeAccountRsCustomData freezeAccountRsCustomData = new FreezeAccountRsCustomData();
+        FreezeAccountRsCustomDataMock freezeAccountRsCustomDataMock = new FreezeAccountRsCustomDataMock();
         FreezeAccountRsCustomDataDetail freezeAccountRsCustomDataDetail = new FreezeAccountRsCustomDataDetail();
-        freezeAccountRsCustomDataDetail.setMessage("SUCCESS");
-        freezeAccountRsCustomDataDetail.setStatus("SUCCESS");
+        freezeAccountRsCustomDataDetail.setMessage(SUCCESS);
+        freezeAccountRsCustomDataDetail.setStatus(SUCCESS);
         freezeAccountRsCustomData.setData(freezeAccountRsCustomDataDetail);
+        freezeAccountRsCustomDataMock.setFreezeAccountRs_Customdata(freezeAccountRsCustomData);
         freezeAccountRs.setFreezeAccountRsCustomData(freezeAccountRsCustomData);
-        serviceResponse.setData(freezeAccountRs);
+        serviceResponse.setData(freezeAccountRsCustomDataMock);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+        when(mapper.map(any(),eq(FreezeAccountRsCustomDataMock.class))).thenReturn(freezeAccountRsCustomDataMock);
+        accountServiceImpl.mapper = mapper;
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -85,6 +103,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleFreezeAccountReturnFailedMockito(){
+        accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -92,14 +111,19 @@ public class AccountServiceTest {
         FinacleResponse serviceResponse = new FinacleResponse();
         FreezeAccountRs freezeAccountRs = new FreezeAccountRs();
         FreezeAccountRsCustomData freezeAccountRsCustomData = new FreezeAccountRsCustomData();
+        FreezeAccountRsCustomDataMock freezeAccountRsCustomDataMock = new FreezeAccountRsCustomDataMock();
         FreezeAccountRsCustomDataDetail freezeAccountRsCustomDataDetail = new FreezeAccountRsCustomDataDetail();
         freezeAccountRsCustomDataDetail.setMessage("NO SE PUDO CONGELAR LA CUENTA");
         freezeAccountRsCustomDataDetail.setStatus("ERROR");
         freezeAccountRsCustomData.setData(freezeAccountRsCustomDataDetail);
         freezeAccountRs.setFreezeAccountRsCustomData(freezeAccountRsCustomData);
-        serviceResponse.setData(freezeAccountRs);
+        freezeAccountRsCustomDataMock.setFreezeAccountRs_Customdata(freezeAccountRsCustomData);
+        serviceResponse.setData(freezeAccountRsCustomDataMock);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+        when(mapper.map(any(),eq(FreezeAccountRsCustomDataMock.class))).thenReturn(freezeAccountRsCustomDataMock);
+        accountServiceImpl.mapper = mapper;
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -115,6 +139,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleFreezeAccountReturn5xxErrorMockito(){
+        accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -126,7 +151,7 @@ public class AccountServiceTest {
                                 .build())
                 ).build();
         when(webClientMock.post()).thenReturn(webClient.post());
-        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -139,12 +164,13 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleFreezeAccountReturnExceptionMockito(){
+        accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
         freezeAccountRQ.setFreezeCode("D");
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/1/savings/FreezeAccount")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -160,6 +186,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleUnFreezeAccountReturnSuccess(){
+        accountServiceImpl.uriUnFreezeAccount = "/1.0/banks/{bankId}/savings/accounts/{account}/freeze";
         FinacleResponse serviceResponse = new FinacleResponse();
         UnFreezeAccountRq unFreezeAccountRq = new UnFreezeAccountRq();
         UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = new  UnFreezeAccountRqCustomData();
@@ -171,7 +198,7 @@ public class AccountServiceTest {
         unFreezeAccountRs.setData("SUCCESS");
         serviceResponse.setData(unFreezeAccountRs);
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("V1.0/banks/2/savings/accounts/00325652222/freeze")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -186,6 +213,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleUnFreeezeAccountReturnFailedMockito(){
+        accountServiceImpl.uriUnFreezeAccount = "/1.0/banks/{bankId}/savings/accounts/{account}/freeze";
         FinacleResponse serviceResponse = new FinacleResponse();
         UnFreezeAccountRq unFreezeAccountRq = new UnFreezeAccountRq();
         UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = new  UnFreezeAccountRqCustomData();
@@ -197,7 +225,7 @@ public class AccountServiceTest {
         unFreezeAccountRs.setData("NO SE PUDO DESCONGELAR LA CUENTA");
         serviceResponse.setData(unFreezeAccountRs);
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("V1.0/banks/2/savings/accounts/00325652222/freeze")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -212,6 +240,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleUnFreezeAccountReturnException(){
+        accountServiceImpl.uriUnFreezeAccount = "/1.0/banks/{bankId}/savings/accounts/{account}/freeze";
         UnFreezeAccountRq unFreezeAccountRq = new UnFreezeAccountRq();
         UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = new  UnFreezeAccountRqCustomData();
         unFreezeAccountRqCustomData.setFreezeReasonCode("D");
@@ -219,7 +248,7 @@ public class AccountServiceTest {
         unFreezeAccountRq.setBankId("2");
         unFreezeAccountRq.setAccountUnFreezeRq_Customdata(unFreezeAccountRqCustomData);
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("V1.0/banks/2/savings/accounts/00325652222/freeze")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -234,6 +263,7 @@ public class AccountServiceTest {
 
     @Test
     public void callFinacleUnFreezeAccountReturn5xxErrorMockito(){
+        accountServiceImpl.uriUnFreezeAccount = "/1.0/banks/{bankId}/savings/accounts/{account}/freeze";
         UnFreezeAccountRq unFreezeAccountRq = new UnFreezeAccountRq();
         UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = new  UnFreezeAccountRqCustomData();
         unFreezeAccountRqCustomData.setFreezeReasonCode("D");
@@ -247,7 +277,7 @@ public class AccountServiceTest {
                                 .build())
                 ).build();
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(webClient.method(HttpMethod.DELETE));
-        when(requestBodyUriSpecMock.uri("V1.0/banks/2/savings/accounts/00325652222/freeze")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
