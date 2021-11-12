@@ -1,6 +1,7 @@
 package co.com.nequi.usecase.createcustomer;
 
 import co.com.nequi.model.customer.Customer;
+import co.com.nequi.model.customer.LiteRegistryBrokerRQ;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
@@ -14,11 +15,12 @@ import co.com.nequi.model.responsefinacle.customer.Meta;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
+import co.com.nequi.usecase.createcustomer.util.UtilString;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,28 +30,40 @@ public class CreateCustomerUseCase {
 
     private final LoggerCustomer loggerCustomer;
 
-    // private final CustomerDefaultDataRepository defaultDataRepository;
+    private final CustomerDefaultDataRepository defaultDataRepository;
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
         try {
             Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
             customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
 
-            Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(this.buildRequestFinacle(customer));
+            return defaultDataRepository.getDefaultData("1").collectList()
+                    .flatMap(defaultData -> {
+                        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
+                        buildRequestFinacle(requestFinacle, customer, defaultData);
+                        loggerCustomer.info(".::DATOS CUSTOMER::.");
+                        return Mono.just(requestFinacle);
+                    }).flatMap(customerFinal -> {
 
-            // Flux<CustomerDefaultData> customerDefaultDataFlux = defaultDataRepository.getDefaultData("1");
+                        Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(customerFinal);
+                        loggerCustomer.info(".::SOLICITUD FINACLE::.");
+                        return responseFinacleMono;
 
-            return responseFinacleMono
+                    })
                     .onErrorResume(e -> Mono.just(buildErrorFinacle("", e.getMessage())))
-                    .flatMap(finacle -> {
-                        loggerCustomer.info("finacle: " + finacle);
-                        List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
+                    .flatMap(responseFinacle -> {
+
+                        loggerCustomer.info(".::RESPUESTA FINACLE::.");
+
+                        List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
                         if (errorDetails.isEmpty()) {
-                            return Mono.just(this.buildResponseSucces(customer, requestMdw));
+                            return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
                         } else {
                             return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
                         }
+
                     });
+
         } catch (CreateCustomerException runtimeException) {
             return Mono.just(this.buildResponseWithError(requestMdw, runtimeException.getMessage()));
         } catch (Exception exception) {
@@ -69,7 +83,103 @@ public class CreateCustomerUseCase {
         return customerResponseFinacle;
     }
 
-    private ResponseMdw buildResponseSucces(Customer customer, RequestMdw requestMdw) {
+    private void buildRequestFinacle(CustomerRequestFinacle requestFinacle, Customer customer, List<CustomerDefaultData> defaultData) {
+        LiteRegistryBrokerRQ liteRegistryBrokerRQ = customer.getLiteRegistryBrokerRQ();
+        defaultData.forEach(item -> {
+            switch (item.getNombre()) {
+                case "CustStatus":
+                    requestFinacle.setCifStatus(item.getValorDefecto());
+                    break;
+                case "CustType":
+                    requestFinacle.setCustType(item.getValorDefecto());
+                    break;
+                case "BirthDt":
+                    String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
+                    if (UtilString.cadenaVacia(birthDate)) {
+                        requestFinacle.setDob("T00:00:00.000");
+                    } else {
+                        requestFinacle.setDob(birthDate);
+                    }
+                    break;
+                case "ShortName":
+                    requestFinacle.setShortName(item.getValorDefecto());
+                    break;
+                case "CustMinorInd":
+                    requestFinacle.setMinor(item.getValorDefecto());
+                    break;
+                case "NRCustInd":
+                    requestFinacle.setTaxResident(item.getValorDefecto());
+                    break;
+                case "FirstName":
+                    requestFinacle.setFirstname(item.getValorDefecto());
+                    break;
+                case "MiddleName":
+                    String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
+                    if (UtilString.cadenaVacia(name2)) {
+                        requestFinacle.setMiddlename("");
+                    } else {
+                        requestFinacle.setMiddlename(item.getValorDefecto());
+                    }
+                    break;
+                case "LastName":
+                    String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
+                    if (UtilString.cadenaVacia(lastName)) {
+                        requestFinacle.setLastname(lastName);
+                    } else {
+                        requestFinacle.setLastname(item.getValorDefecto());
+                    }
+                    break;
+                case "MotherMaidenName":
+                    String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
+                    if (UtilString.cadenaVacia(motherMaidenName)) {
+                        requestFinacle.setMotherMaidenName("");
+                    } else {
+                        requestFinacle.setMiddlename(motherMaidenName);
+                    }
+                    break;
+                case "Gender":
+                    requestFinacle.setGender(item.getValorDefecto());
+                    break;
+                case "RelationshipOpeningDt":
+                    requestFinacle.setRelStartDate(new Date().toString());
+                    break;
+                case "SegmentationClass":
+                    requestFinacle.setRetailSegment(item.getValorDefecto());
+                    break;
+                case "TitlePrefix":
+                    requestFinacle.setSaluation(item.getValorDefecto());
+                    break;
+                case "PrimaryServiceCenter":
+                    requestFinacle.setPrimaryBranch(item.getValorDefecto());
+                    break;
+                case "MaritalStatus":
+                    requestFinacle.setMaritalStatus(item.getValorDefecto());
+                    break;
+                case "Nationality":
+                    requestFinacle.setCountryofPrimaryCitizenship(item.getValorDefecto());
+                    break;
+                default:
+            }
+        });
+        requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
+        requestFinacle.setEmailDetails(buildEmailDetails());
+        requestFinacle.setPhoneDetails(buildPhoneDetails());
+        requestFinacle.setAddresses(buildAddresses());
+        requestFinacle.setAlternateLanguages(buildAlternateLanguages());
+        requestFinacle.setIdentificationDocuments(buildIdentificationDocuments());
+        requestFinacle.setEmploymentDetails(buildEmploymentDetails());
+        requestFinacle.setRetailIncome(buildRetailIncome());
+        requestFinacle.setRetailExpense(buildRetailExpense());
+        requestFinacle.setBankStaffs(buildBankStaffs());
+        requestFinacle.setCurrencyDetails(buildCurrencyDetails());
+        requestFinacle.setCifID("non ja");
+        requestFinacle.setSeniorCitizen("lab");
+        requestFinacle.setTaxIDType("ut non aute nostrud");
+        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
+        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
+    }
+
+    private ResponseMdw buildResponseSucces(String cifId, RequestMdw requestMdw) {
         Destination destination = BuildMessageUtil.buildDestination(
                 requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
                 requestMdw.getRequestHeaderOut().getHeader().getDestination().getNamespace(),
@@ -79,7 +189,7 @@ public class CreateCustomerUseCase {
         Header header = BuildMessageUtil.buildHeader(requestMdw.getRequestHeaderOut().getHeader().getSystemID(),
                 requestMdw.getRequestHeaderOut().getHeader().getMessageID(),
                 requestMdw.getRequestHeaderOut().getHeader().getInvokerDateTime(), destination, responseStatus);
-        ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, customer);
+        ResponseHeaderOut responseHeaderOut = BuildMessageUtil.buildResponseHeaderOut(header, cifId);
         return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
     }
 
@@ -258,39 +368,6 @@ public class CreateCustomerUseCase {
                         .build()
         );
         return currencyDetails;
-    }
-
-    private CustomerRequestFinacle buildRequestFinacle(Customer customer) {
-        return CustomerRequestFinacle.builder()
-                .relationshipmanagerInfo(buildRelationshipmanagerInfo())
-                .emailDetails(buildEmailDetails())
-                .phoneDetails(buildPhoneDetails())
-                .addresses(buildAddresses())
-                .alternateLanguages(buildAlternateLanguages())
-                .identificationDocuments(buildIdentificationDocuments())
-                .employmentDetails(buildEmploymentDetails())
-                .retailIncome(buildRetailIncome())
-                .retailExpense(buildRetailExpense())
-                .bankStaffs(buildBankStaffs())
-                .currencyDetails(buildCurrencyDetails())
-                .cifID("occaecat in pro")
-                .custType("non ")
-                .shortName("sit in")
-                .seniorCitizen("lab")
-                .taxIDType("ut non aute nostrud")
-                .taxIdentificationNumber("et aute eiusmod proident")
-                .taxExemptionCode("dolore adipisicing laboru")
-                .taxResident("enim eiusmod mollit ")
-                .firstname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName1())
-                .middlename(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName2())
-                .lastname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getLastName1())
-                .motherMaidenName("magna quis dolore")
-                .gender("culpa qui")
-                .retailSegment("tempor ut sunt es")
-                .maritalStatus("velit magn")
-                .countryofPrimaryCitizenship("in")
-                .cifStatus("ipsum magna v")
-                .build();
     }
 
 
