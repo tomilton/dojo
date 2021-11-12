@@ -15,5 +15,5 @@ import lombok.Setter;
 public class FinacleResponse {
 
     @JsonProperty("data")
-    private FreezeAccountRs data;
+    private Object data;
 }
