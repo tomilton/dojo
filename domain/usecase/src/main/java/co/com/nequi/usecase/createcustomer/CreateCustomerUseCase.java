@@ -6,7 +6,6 @@ import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
-import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
@@ -36,9 +35,35 @@ public class CreateCustomerUseCase {
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
 
+        Mono<Customer> customerMono = Mono.fromCallable(() -> (Customer) requestMdw.getRequestHeaderOut().getBody().getAny());
+        Mono<List<CustomerDefaultData>> defaultDataFlux = defaultDataRepository.getDefaultData("1").collectList();
+
+        Mono<CustomerRequestFinacle> requestFinacleMono = customerMono
+                .zipWith(defaultDataFlux)
+                .map(tuple -> {
+                    Customer customer = tuple.getT1();
+                    customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
+                    CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
+                    buildRequestFinacle(requestFinacle, customer, tuple.getT2());
+                    return requestFinacle;
+                });
+
+        Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
+
+        return requestFinacle.flatMap(responseFinacle -> {
+            List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
+            if (errorDetails.isEmpty()) {
+                return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
+            } else {
+                return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
+            }
+        }).onErrorResume(error -> Mono.just(this.buildResponseWithError(requestMdw, error.getMessage())));
+
+    }
+
+    public Mono<ResponseMdw> createCustomer1(RequestMdw requestMdw) {
         Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
         customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-
         return defaultDataRepository.getDefaultData("1").collectList()
                 .doOnNext(next -> {
                     loggerCustomer.info(".::TRAZANDO DATOS POR DEFECTO::.");
@@ -118,11 +143,7 @@ public class CreateCustomerUseCase {
                     break;
                 case "MiddleName":
                     String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
-                    if (UtilString.cadenaVacia(name2)) {
-                        requestFinacle.setMiddlename("");
-                    } else {
-                        requestFinacle.setMiddlename(item.getValorDefecto());
-                    }
+                    requestFinacle.setMiddlename(UtilString.cadenaVacia(name2) ? "" : item.getValorDefecto());
                     break;
                 case "LastName":
                     String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
