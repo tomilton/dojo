@@ -36,14 +36,7 @@ public class CreateCustomerUseCase {
         Mono<List<CustomerDefaultData>> defaultDataFlux = defaultDataRepository.getDefaultData("1").collectList();
 
         Mono<CustomerRequestFinacle> requestFinacleMono = customerMono
-                .zipWith(defaultDataFlux)
-                .map(tuple -> {
-                    Customer customer = tuple.getT1();
-                    customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-                    CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
-                    buildRequestFinacle(requestFinacle, customer, tuple.getT2());
-                    return requestFinacle;
-                });
+                .zipWith(defaultDataFlux).map(tuple -> buildRequestFinacle(tuple.getT1(), tuple.getT2()));
 
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
@@ -60,8 +53,10 @@ public class CreateCustomerUseCase {
 
     }
 
-    private void buildRequestFinacle(CustomerRequestFinacle requestFinacle, Customer customer, List<CustomerDefaultData> defaultData) {
-        LiteRegistryBrokerRQ liteRegistryBrokerRQ = customer.getLiteRegistryBrokerRQ();
+    private CustomerRequestFinacle buildRequestFinacle(Customer customer, List<CustomerDefaultData> defaultData) {
+        LiteRegistryBrokerRQ middleware = customer.getLiteRegistryBrokerRQ();
+        middleware.getPersonalInfo().validarIdNumber();
+        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
         defaultData.forEach(item -> {
             switch (item.getNombre()) {
                 case "CustStatus":
@@ -71,7 +66,7 @@ public class CreateCustomerUseCase {
                     requestFinacle.setCustType(item.getValorDefecto());
                     break;
                 case "BirthDt":
-                    requestFinacle.setDob(getDob(requestFinacle, liteRegistryBrokerRQ));
+                    requestFinacle.setDob(getDob(requestFinacle, middleware));
                     break;
                 case "ShortName":
                     requestFinacle.setShortName(item.getValorDefecto());
@@ -86,13 +81,13 @@ public class CreateCustomerUseCase {
                     requestFinacle.setFirstname(item.getValorDefecto());
                     break;
                 case "MiddleName":
-                    requestFinacle.setMiddlename(getMiddlename(requestFinacle, liteRegistryBrokerRQ, item));
+                    requestFinacle.setMiddlename(getMiddlename(requestFinacle, middleware, item));
                     break;
                 case "LastName":
-                    requestFinacle.setLastname(getLastName(requestFinacle, liteRegistryBrokerRQ, item));
+                    requestFinacle.setLastname(getLastName(requestFinacle, middleware, item));
                     break;
                 case "MotherMaidenName":
-                    requestFinacle.setMotherMaidenName(getMotherMaidenName(requestFinacle, liteRegistryBrokerRQ, item));
+                    requestFinacle.setMotherMaidenName(getMotherMaidenName(requestFinacle, middleware, item));
                     break;
                 case "Gender":
                     requestFinacle.setGender(item.getValorDefecto());
@@ -118,6 +113,16 @@ public class CreateCustomerUseCase {
                 default:
             }
         });
+        buildListsFinacle(requestFinacle);
+        requestFinacle.setCifID("non ja");
+        requestFinacle.setSeniorCitizen("lab");
+        requestFinacle.setTaxIDType("ut non aute nostrud");
+        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
+        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
+        return requestFinacle;
+    }
+
+    private void buildListsFinacle(final CustomerRequestFinacle requestFinacle) {
         requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
         requestFinacle.setEmailDetails(buildEmailDetails());
         requestFinacle.setPhoneDetails(buildPhoneDetails());
@@ -129,11 +134,6 @@ public class CreateCustomerUseCase {
         requestFinacle.setRetailExpense(buildRetailExpense());
         requestFinacle.setBankStaffs(buildBankStaffs());
         requestFinacle.setCurrencyDetails(buildCurrencyDetails());
-        requestFinacle.setCifID("non ja");
-        requestFinacle.setSeniorCitizen("lab");
-        requestFinacle.setTaxIDType("ut non aute nostrud");
-        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
-        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
     }
 
     private String getMotherMaidenName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData item) {
