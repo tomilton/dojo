@@ -41,7 +41,8 @@ public class CreateCustomerUseCase {
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
         return requestFinacle.flatMap(responseFinacle -> handleResponseFinacle(responseFinacle, requestMdw)
-        ).onErrorResume(error -> handleErrors(error, requestMdw));
+                ).doOnError(error -> loggerCustomer.info("Customer Trace: " + error.getMessage()))
+                .onErrorResume(error -> handleErrors(error, requestMdw));
     }
 
     private Mono<ResponseMdw> handleResponseFinacle(CustomerResponseFinacle responseFinacle, RequestMdw requestMdw) {
