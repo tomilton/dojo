@@ -31,8 +31,8 @@ public class CreateCustomerUseCase {
     private final CustomerDefaultDataRepository defaultDataRepository;
 
     public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
-
         Mono<Customer> customerMono = Mono.fromCallable(() -> (Customer) requestMdw.getRequestHeaderOut().getBody().getAny());
+
         Mono<List<CustomerDefaultData>> defaultDataFlux = defaultDataRepository.getDefaultData("1").collectList();
 
         Mono<CustomerRequestFinacle> requestFinacleMono = customerMono
@@ -40,17 +40,21 @@ public class CreateCustomerUseCase {
 
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
-        requestFinacle.subscribe();
+        return requestFinacle.flatMap(responseFinacle -> handleResponseFinacle(responseFinacle, requestMdw)
+        ).onErrorResume(error -> handleErrors(error, requestMdw));
+    }
 
-        return requestFinacle.flatMap(responseFinacle -> {
-            List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
-            if (errorDetails.isEmpty()) {
-                return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
-            } else {
-                return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
-            }
-        }).onErrorResume(error -> Mono.just(this.buildResponseWithError(requestMdw, error.getMessage())));
+    private Mono<ResponseMdw> handleResponseFinacle(CustomerResponseFinacle responseFinacle, RequestMdw requestMdw) {
+        List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
+        if (errorDetails.isEmpty()) {
+            return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
+        } else {
+            return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
+        }
+    }
 
+    private Mono<ResponseMdw> handleErrors(Throwable error, RequestMdw requestMdw) {
+        return Mono.just(this.buildResponseWithError(requestMdw, error.getMessage()));
     }
 
     private CustomerRequestFinacle buildRequestFinacle(Customer customer, List<CustomerDefaultData> defaultData) {
@@ -362,6 +366,5 @@ public class CreateCustomerUseCase {
         );
         return currencyDetails;
     }
-
 
 }
