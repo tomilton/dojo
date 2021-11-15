@@ -6,16 +6,13 @@ import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
-import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
 import co.com.nequi.model.responsefinacle.customer.ErrorDetail;
-import co.com.nequi.model.responsefinacle.customer.Meta;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
-import co.com.nequi.model.exceptions.DefaultDataException;
 import co.com.nequi.usecase.createcustomer.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -50,6 +47,8 @@ public class CreateCustomerUseCase {
 
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
+        requestFinacle.subscribe();
+
         return requestFinacle.flatMap(responseFinacle -> {
             List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
             if (errorDetails.isEmpty()) {
@@ -59,56 +58,6 @@ public class CreateCustomerUseCase {
             }
         }).onErrorResume(error -> Mono.just(this.buildResponseWithError(requestMdw, error.getMessage())));
 
-    }
-
-    public Mono<ResponseMdw> createCustomer1(RequestMdw requestMdw) {
-        Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
-        customer.getLiteRegistryBrokerRQ().getPersonalInfo().validarIdNumber();
-        return defaultDataRepository.getDefaultData("1").collectList()
-                .doOnNext(next -> {
-                    loggerCustomer.info(".::TRAZANDO DATOS POR DEFECTO::.");
-                })
-                .doOnError(de -> loggerCustomer.info("Error defult data: " + de.getMessage()))
-                .flatMap(defaultData -> {
-                    CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
-                    buildRequestFinacle(requestFinacle, customer, defaultData);
-                    loggerCustomer.info(".::DATOS CUSTOMER::.");
-                    return Mono.just(requestFinacle);
-                }).flatMap(customerFinal -> {
-                    Mono<CustomerResponseFinacle> responseFinacleMono = customerServiceFinacle.save(customerFinal);
-                    loggerCustomer.info(".::SOLICITUD FINACLE::.");
-                    return responseFinacleMono;
-                })
-                .onErrorResume(e -> {
-                    if (e instanceof CreateCustomerFinacleException) {
-                        loggerCustomer.info("CreateCustomerFinacleException: " + e.getMessage());
-                    }
-                    if (e instanceof DefaultDataException) {
-                        loggerCustomer.info("CreateCustomerFinacleException: " + e.getMessage());
-                    }
-                    return Mono.just(buildErrorFinacle("", e.getMessage()));
-                })
-                .flatMap(responseFinacle -> {
-                    loggerCustomer.info(".::RESPUESTA FINACLE::.");
-                    List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
-                    if (errorDetails.isEmpty()) {
-                        return Mono.just(this.buildResponseSucces(responseFinacle.getData().getCifID(), requestMdw));
-                    } else {
-                        return Mono.just(this.buildResponseWithError(requestMdw, errorDetails.toString()));
-                    }
-                });
-    }
-
-
-    private CustomerResponseFinacle buildErrorFinacle(String errorcode, String errordesc) {
-        CustomerResponseFinacle customerResponseFinacle = new CustomerResponseFinacle();
-        customerResponseFinacle.setMeta(new Meta());
-        ErrorDetail errorDetail = new ErrorDetail();
-        errorDetail.setErrorcode(errorcode);
-        errorDetail.setErrordesc(errordesc);
-        customerResponseFinacle.getMeta().setErrorDetails(new ArrayList<>());
-        customerResponseFinacle.getMeta().getErrorDetails().add(errorDetail);
-        return customerResponseFinacle;
     }
 
     private void buildRequestFinacle(CustomerRequestFinacle requestFinacle, Customer customer, List<CustomerDefaultData> defaultData) {
@@ -122,12 +71,7 @@ public class CreateCustomerUseCase {
                     requestFinacle.setCustType(item.getValorDefecto());
                     break;
                 case "BirthDt":
-                    String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
-                    if (UtilString.cadenaVacia(birthDate)) {
-                        requestFinacle.setDob("T00:00:00.000");
-                    } else {
-                        requestFinacle.setDob(birthDate);
-                    }
+                    requestFinacle.setDob(getDob(requestFinacle, liteRegistryBrokerRQ));
                     break;
                 case "ShortName":
                     requestFinacle.setShortName(item.getValorDefecto());
@@ -142,24 +86,13 @@ public class CreateCustomerUseCase {
                     requestFinacle.setFirstname(item.getValorDefecto());
                     break;
                 case "MiddleName":
-                    String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
-                    requestFinacle.setMiddlename(UtilString.cadenaVacia(name2) ? "" : item.getValorDefecto());
+                    requestFinacle.setMiddlename(getMiddlename(requestFinacle, liteRegistryBrokerRQ, item));
                     break;
                 case "LastName":
-                    String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
-                    if (UtilString.cadenaVacia(lastName)) {
-                        requestFinacle.setLastname(lastName);
-                    } else {
-                        requestFinacle.setLastname(item.getValorDefecto());
-                    }
+                    requestFinacle.setLastname(getLastName(requestFinacle, liteRegistryBrokerRQ, item));
                     break;
                 case "MotherMaidenName":
-                    String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
-                    if (UtilString.cadenaVacia(motherMaidenName)) {
-                        requestFinacle.setMotherMaidenName("");
-                    } else {
-                        requestFinacle.setMiddlename(motherMaidenName);
-                    }
+                    requestFinacle.setMotherMaidenName(getMotherMaidenName(requestFinacle, liteRegistryBrokerRQ, item));
                     break;
                 case "Gender":
                     requestFinacle.setGender(item.getValorDefecto());
@@ -201,6 +134,42 @@ public class CreateCustomerUseCase {
         requestFinacle.setTaxIDType("ut non aute nostrud");
         requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
         requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
+    }
+
+    private String getMotherMaidenName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData item) {
+        String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
+        if (UtilString.cadenaVacia(requestFinacle.getMotherMaidenName()) && UtilString.cadenaVacia(motherMaidenName)) {
+            return motherMaidenName;
+        } else {
+            return item.getValorDefecto();
+        }
+    }
+
+    private String getDob(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
+        String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
+        if (UtilString.cadenaVacia(requestFinacle.getDob()) && !UtilString.cadenaVacia(birthDate)) {
+            return birthDate;
+        } else {
+            return "T00:00:00.000";
+        }
+    }
+
+    private String getLastName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData item) {
+        String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
+        if (UtilString.cadenaVacia(requestFinacle.getLastname()) && !UtilString.cadenaVacia(lastName)) {
+            return lastName;
+        } else {
+            return item.getValorDefecto();
+        }
+    }
+
+    private String getMiddlename(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData defaultData) {
+        String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
+        if (UtilString.cadenaVacia(requestFinacle.getMiddlename()) && !UtilString.cadenaVacia(name2)) {
+            return name2;
+        } else {
+            return defaultData.getValorDefecto();
+        }
     }
 
     private ResponseMdw buildResponseSucces(String cifId, RequestMdw requestMdw) {
