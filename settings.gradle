@@ -16,3 +16,5 @@ include ':trace'
 project(':trace').projectDir = file('./infrastructure/driven-adapters/trace')
 include ':web-client'
 project(':web-client').projectDir = file('./infrastructure/driven-adapters/web-client')
+include ':web-client-defaultdata'
+project(':web-client-defaultdata').projectDir = file('./infrastructure/driven-adapters/web-client-defaultdata')

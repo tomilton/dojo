@@ -1,11 +1,8 @@
 package co.com.nequi.model.requestfinacle.customer;
 
-import lombok.Builder;
-
 import java.util.List;
 
 @lombok.Data
-@Builder(toBuilder = true)
 public class CustomerRequestFinacle {
     private List<RelationshipmanagerInfo> relationshipmanagerInfo;
     private List<EmailDetail> emailDetails;
@@ -23,6 +20,7 @@ public class CustomerRequestFinacle {
     private String custType;
     private String dob;
     private String shortName;
+    private String saluation;
     private String minor;
     private String seniorCitizen;
     private String primaryBranch;
