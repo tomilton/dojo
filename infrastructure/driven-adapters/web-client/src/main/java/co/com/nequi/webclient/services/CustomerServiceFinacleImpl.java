@@ -13,6 +13,7 @@ import co.com.nequi.webclient.json.customer.request.CustomerRequestJSON;
 import co.com.nequi.webclient.json.customer.request.GetCustomerDetails;
 import co.com.nequi.webclient.json.customer.response.CustomerDetailResponseJSON;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
+import co.com.nequi.webclient.json.customer.response.FinacleResponse;
 import org.reactivecommons.utils.ObjectMapper;
 import org.reactivecommons.utils.ObjectMapperImp;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
 
         requestJSON.setGetCustomerDetails(getCustomerDetails);
 
-        Mono<CustomerDetailResponseJSON> finacleResponse = client.post()
+        Mono<String> finacleResponse = client.post()
                 .uri("/V1.0/banks/1500/savings/InquireDetails")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
@@ -67,15 +68,35 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
                 .bodyValue(requestJSON)
                 .retrieve()
                 .onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new Exception()))
-                .bodyToMono(CustomerDetailResponseJSON.class)
-                .onErrorMap(throwable -> new Exception());
+                .bodyToMono(String.class)
+                /*.onErrorResume(
+                        Exception.class,
+                        error -> {
+                            info(error.getMessage());
+                            return Mono.just(4);
+                        }
+                )*/
+                .onErrorMap(t -> {
+                    info(t.getMessage());
+                    new Exception();
+                    return t;
+                });
 
+                finacleResponse.doOnNext(f -> {
+                    info(f.toString());
+                }).subscribe();
 
-        finacleResponse
-                .doOnNext(f -> info(f.toString()))
-                .subscribe();
-        
-        return finacleResponse.map(obj -> {
+        Mono<CustomerDetailResponseFinacle> custom = finacleResponse.map( f-> {
+            info(f.toString());
+            CustomerDetailResponseFinacle obj = objectMapper.map(f, CustomerDetailResponseFinacle.class);
+
+            return obj;
+        });
+
+        //custom.doOnNext( c -> info(c.getData().getData().getInquireDetailsRsCustomdata().getData().getOutputData().getData().getAcctStatus()));
+
+        return null;
+        /*return finacleResponse.map(obj -> {
          CustomerDetailResponseFinacle customerDetailResponseFinacle = new CustomerDetailResponseFinacle();
 
          Meta meta = new Meta();
@@ -83,7 +104,7 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
 
          customerDetailResponseFinacle.setMeta(meta);
          return customerDetailResponseFinacle;
-        });
+        });*/
     }
 
     @Override
