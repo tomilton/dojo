@@ -35,8 +35,8 @@ public class WebClientConfig implements CommandLineRunner {
     }
 
     private void acceptedCodecs(ClientCodecConfigurer clientCodecConfigurer) {
-        //clientCodecConfigurer.customCodecs().encoder(new Jackson2JsonEncoder(new ObjectMapper(), TEXT_HTML, TEXT_PLAIN , TEXT_XML));
-        //clientCodecConfigurer.customCodecs().decoder(new Jackson2JsonDecoder(new ObjectMapper(), TEXT_HTML, TEXT_PLAIN , TEXT_XML));
+        clientCodecConfigurer.customCodecs().encoder(new Jackson2JsonEncoder(new ObjectMapper(), TEXT_HTML, TEXT_PLAIN , TEXT_XML));
+        clientCodecConfigurer.customCodecs().decoder(new Jackson2JsonDecoder(new ObjectMapper(), TEXT_HTML, TEXT_PLAIN , TEXT_XML));
     }
 
     @Override

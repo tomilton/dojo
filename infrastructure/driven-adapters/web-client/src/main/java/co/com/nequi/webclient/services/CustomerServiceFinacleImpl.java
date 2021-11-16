@@ -32,7 +32,8 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
     @Autowired
     private WebClient client;
 
-    private final ObjectMapper objectMapper = new ObjectMapperImp();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public Mono<CustomerResponseFinacle> save(CustomerRequestFinacle customerRequestFinacle) {
@@ -60,51 +61,23 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
 
         requestJSON.setGetCustomerDetails(getCustomerDetails);
 
-        Mono<String> finacleResponse = client.post()
-                .uri("/V1.0/banks/1500/savings/InquireDetails")
+        Mono<String> finacle = client.post()
+                .uri("/V1.0/banks/1500/savings/InquireDetails2")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestJSON)
                 .retrieve()
-                .onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new Exception()))
                 .bodyToMono(String.class)
-                /*.onErrorResume(
-                        Exception.class,
-                        error -> {
-                            info(error.getMessage());
-                            return Mono.just(4);
-                        }
-                )*/
-                .onErrorMap(t -> {
-                    info(t.getMessage());
-                    new Exception();
-                    return t;
+                .doOnError(error -> {
+                    System.out.println(error);
                 });
 
-                finacleResponse.doOnNext(f -> {
-                    info(f.toString());
-                }).subscribe();
-
-        Mono<CustomerDetailResponseFinacle> custom = finacleResponse.map( f-> {
-            info(f.toString());
-            CustomerDetailResponseFinacle obj = objectMapper.map(f, CustomerDetailResponseFinacle.class);
-
-            return obj;
+        finacle.map(f -> {
+            System.out.println("Entra en el map: " + f.toString());
+            return null; //objectMapper.map(f, CustomerDetailResponseFinacle.class);
         });
-
-        //custom.doOnNext( c -> info(c.getData().getData().getInquireDetailsRsCustomdata().getData().getOutputData().getData().getAcctStatus()));
-
         return null;
-        /*return finacleResponse.map(obj -> {
-         CustomerDetailResponseFinacle customerDetailResponseFinacle = new CustomerDetailResponseFinacle();
-
-         Meta meta = new Meta();
-         meta.setContexturl(obj.getMeta().getContexturl());
-
-         customerDetailResponseFinacle.setMeta(meta);
-         return customerDetailResponseFinacle;
-        });*/
     }
 
     @Override

@@ -100,9 +100,8 @@ public class Handler {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
                     mdw.getRequestHeaderOut().getBody().setAny(customerDetailReq);
-                    return mdw;
+                    return getCustomerDetailUseCase.getCustomerDetail(mdw);
                 })
-                .flatMap(getCustomerDetailUseCase::getCustomerDetail)
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/getCustomerDetails"))
                         .contentType(MediaType.APPLICATION_JSON)
