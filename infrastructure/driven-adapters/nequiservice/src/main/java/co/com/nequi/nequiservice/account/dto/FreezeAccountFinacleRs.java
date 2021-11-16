@@ -12,8 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FinacleResponse {
-
-    @JsonProperty("data")
-    private Object data;
+public class FreezeAccountFinacleRs {
+    @JsonProperty("FreezeAccountRs_Customdata")
+    private FreezeAccountRs freezeAccountRsCustomData;
 }

@@ -1,24 +1,16 @@
 package com.com.nequi.api.handler;
 
 import co.com.nequi.api.AccountHandler;
+import co.com.nequi.api.config.ReflectionUtils;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
-import co.com.nequi.api.requestmdw.RequestHeaderOut;
-import co.com.nequi.api.requestmdw.Header;
-import co.com.nequi.api.requestmdw.Destination;
-import co.com.nequi.api.requestmdw.SecurityCredential;
-import co.com.nequi.api.requestmdw.MessageContext;
-import co.com.nequi.api.requestmdw.Property;
-import co.com.nequi.api.requestmdw.Item;
-import co.com.nequi.api.requestmdw.Body;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
-import co.com.nequi.model.account.dto.FreezeAccountRQ;
-import co.com.nequi.model.account.dto.FreezeAccountRqDto;
-import co.com.nequi.model.account.dto.FreezeAccountRs;
+import co.com.nequi.model.account.dto.*;
 import co.com.nequi.model.requestmdw.*;
 import co.com.nequi.model.responsemdw.ResponseHeaderOut;
 import co.com.nequi.model.responsemdw.ResponseMdw;
-import co.com.nequi.trace.TraceAdapter;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
+import co.com.nequi.usecase.unfreezeaccount.UnFreezeAccountUseCase;
+import com.com.nequi.api.handler.dataprovider.DataProviderRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -33,10 +25,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,12 +43,19 @@ public class AccountHandlerTest {
     @Mock
     private FreezeAccountUseCase freezeUserCase;
 
+    @Mock
+    private UnFreezeAccountUseCase unFreezeAccountUseCase;
+
     @InjectMocks
     private AccountHandler accountHandler;
 
     @Test
     public void freezeAccountRequest() throws Exception {
-        RequestJsonMdw requestMdw = buildRequestDefaultTest();
+        FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
+        freezeAccountRQ.setAccountNumber("87052427983");
+        freezeAccountRQ.setReasonCode("10");
+        freezeAccountRQ.setFreezeCode("D");
+        RequestJsonMdw requestMdw = DataProviderRequest.buildRequestFreezeAccountDefaultTest(freezeAccountRQ);
         ServerRequest serverRequestMock = mock(ServerRequest.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
         when(serverRequestMock.bodyToMono(RequestJsonMdw.class)).thenReturn(Mono.just(requestMdw));
@@ -68,9 +63,34 @@ public class AccountHandlerTest {
         when(mapper.map(any(),eq(FreezeAccountRqDto.class))).thenReturn(buildFreezeAccountRqDto());
         when(mapper.map(any(),eq(ResponseJsonMdw.class))).thenReturn(buildResponseJsonMdwOK());
         when(freezeUserCase.freezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
-        setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
-        setFinalStaticField(AccountHandler.class, "freezeUserCase", freezeUserCase,accountHandler);
+        ReflectionUtils.setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
+        ReflectionUtils.setFinalStaticField(AccountHandler.class, "freezeUserCase", freezeUserCase,accountHandler);
         Mono<ServerResponse> responseHandler = accountHandler.freezeAccount(serverRequestMock);
+        StepVerifier.create(responseHandler)
+                .consumeNextWith(response -> {
+                    assertNotNull(response);
+                    assertNotNull(response.statusCode());
+                    assertEquals(response.statusCode(), HttpStatus.CREATED);
+                }).verifyComplete();
+
+    }
+
+    @Test
+    public void unFreezeAccountRequest() throws Exception {
+        UnFreezeAccountBrokerRQ unFreezeAccountBrokerRQ = new UnFreezeAccountBrokerRQ("0100232484","14");
+        UnFreezeAccountBrokerRQMock unFreezeAccountBrokerRQMock = new UnFreezeAccountBrokerRQMock();
+        unFreezeAccountBrokerRQMock.setUnfreezeAccountBrokerRQ(unFreezeAccountBrokerRQ);
+        RequestJsonMdw requestMdw = DataProviderRequest.buildRequestUnFreezeAccountDefaultTest((unFreezeAccountBrokerRQ));
+        ServerRequest serverRequestMock = mock(ServerRequest.class);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+        when(serverRequestMock.bodyToMono(RequestJsonMdw.class)).thenReturn(Mono.just(requestMdw));
+        when(mapper.map(any(),eq(RequestMdw.class))).thenReturn(buildRequestMdw());
+        when(mapper.map(any(),eq(UnFreezeAccountBrokerRQMock.class))).thenReturn(buildUnFreezeAccountBrokerRQMock());
+        when(mapper.map(any(),eq(ResponseJsonMdw.class))).thenReturn(buildResponseJsonMdwOK());
+        when(unFreezeAccountUseCase.unFreezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
+        ReflectionUtils.setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
+        ReflectionUtils.setFinalStaticField(AccountHandler.class, "unFreezeAccountUseCase", unFreezeAccountUseCase,accountHandler);
+        Mono<ServerResponse> responseHandler = accountHandler.unFreezeAccount(serverRequestMock);
         StepVerifier.create(responseHandler)
                 .consumeNextWith(response -> {
                     assertNotNull(response);
@@ -118,61 +138,10 @@ public class AccountHandlerTest {
         return dtoRequest;
     }
 
-    private RequestJsonMdw buildRequestDefaultTest(){
-        RequestJsonMdw requestMdw = new RequestJsonMdw();
-        RequestHeaderOut requestHeaderOut = new RequestHeaderOut();
-        SecurityCredential securityCredential = new SecurityCredential();
-        securityCredential.setUserName("BROKER");
-        securityCredential.setUserToken("TOKEN");
-        Header header = new Header();
-        header.setSystemID("MF-001");
-        header.setMessageID("1635390551131");
-        header.setInvokerDateTime("2021-10-27 22:09:10");
-        header.setSecurityCredential(securityCredential);
-        Destination destination = new Destination();
-        destination.setName("Account");
-        destination.setNamespace("http://co.bancaDigital/nequi/services/AccountServices/Account/v1.0");
-        destination.setOperation("freezeAccount");
-        header.setDestination(destination);
-        MessageContext messageContext = new MessageContext();
-        Property property = new Property();
-        List<Item> items = new ArrayList<>();
-        Item item1 = new Item();
-        item1.setKey("RQ");
-        item1.setValue("freezeAccountRQ");
-        items.add(item1);
-        Item item2 = new Item();
-        item2.setKey("RS");
-        item2.setValue("freezeAccountRS");
-        items.add(item2);
-        Item item3 = new Item();
-        item3.setKey("Region");
-        item3.setValue("C001");
-        items.add(item3);
-        Item item4 = new Item();
-        item4.setKey("appType");
-        item4.setValue("Nequi");
-        items.add(item4);
-        property.setItem(items);
-        messageContext.setProperty(property);
-        header.setMessageContext(messageContext);
-        requestHeaderOut.setHeader(header);
-        Body body = new Body();
-        FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
-        freezeAccountRQ.setAccountNumber("87052427983");
-        freezeAccountRQ.setReasonCode("10");
-        freezeAccountRQ.setFreezeCode("D");
-        body.setAny(freezeAccountRQ);
-        requestHeaderOut.setBody(body);
-        requestMdw.setRequestHeaderOut(requestHeaderOut);
-        return requestMdw;
-    }
-
-    private static void setFinalStaticField(Class<?> clazz, String fieldName, Object value, Object classChange)
-            throws ReflectiveOperationException {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(classChange, value);
+    private UnFreezeAccountBrokerRQMock buildUnFreezeAccountBrokerRQMock(){
+        UnFreezeAccountBrokerRQMock unFreezeAccountBrokerRQ = new UnFreezeAccountBrokerRQMock();
+        unFreezeAccountBrokerRQ.setUnfreezeAccountBrokerRQ(new UnFreezeAccountBrokerRQ("0100232484","14"));
+        return unFreezeAccountBrokerRQ;
     }
 
 }

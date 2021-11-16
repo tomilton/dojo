@@ -19,4 +19,8 @@ spring:
   jpa:
     databasePlatform: "org.hibernate.dialect.H2Dialect"
 traceconfig:
-  type: "logback"
+  type : logback
+finacle:
+  uri:
+   freezeAccount: "/V1/banks/{bankId}/savings/FreezeAccount"
+   unfreezeAccount: "/V1.0/banks/{bankId}/savings/accounts/{account}/freeze"

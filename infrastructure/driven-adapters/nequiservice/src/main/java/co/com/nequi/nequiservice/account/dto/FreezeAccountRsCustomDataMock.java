@@ -11,9 +11,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class FinacleResponse {
-
-    @JsonProperty("data")
-    private Object data;
+@JsonIgnoreProperties
+public class FreezeAccountRsCustomDataMock {
+    @JsonProperty("FreezeAccountRs_Customdata")
+    private FreezeAccountRsCustomData freezeAccountRs_Customdata;
 }
