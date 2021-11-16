@@ -2,6 +2,9 @@ package co.com.nequi.usecase.createcustomer.constant;
 
 public class Constant {
 
+    private Constant() {
+    }
+
     public static final String COMMON_STRING_ZERO = "0";
     public static final String COMMON_STRING_ONE = "1";
     public static final String COMMON_STRING_FIVE_HUNDRED = "500";

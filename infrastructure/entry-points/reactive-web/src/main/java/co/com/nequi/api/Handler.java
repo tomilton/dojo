@@ -1,5 +1,7 @@
 package co.com.nequi.api;
 
+import co.com.nequi.api.models.createcustomer.CustomerJsonMdwRs;
+import co.com.nequi.api.models.createcustomer.LiteRegistryBrokerRS;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.customer.Customer;
@@ -72,10 +74,16 @@ public class Handler {
                     return mdw;
                 })
                 .flatMap(createCustomerUseCase::createCustomer)
+                .map(responseMdw -> {
+                    ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
+                    CustomerJsonMdwRs brokerRS = mapper.map(mdw.getResponseHeaderOut().getBody().getAny(), CustomerJsonMdwRs.class);
+                    mdw.getResponseHeaderOut().getBody().setAny(brokerRS);
+                    return mdw;
+                })
                 .flatMap(sr -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(fromValue(mapper.map(sr, ResponseJsonMdw.class)))
+                        .body(fromValue(sr))
                 );
     }
 
