@@ -1,7 +1,6 @@
 package co.com.nequi.nequiservice.account;
 
 import co.com.nequi.model.account.dto.*;
-import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.nequiservice.account.dto.*;
 import co.com.nequi.model.exceptions.AccountOperationException;
 import co.com.nequi.nequiservice.account.dto.FreezeAccountRs;
@@ -194,9 +193,16 @@ public class AccountServiceTest {
         unFreezeAccountRq.setAccountId("00325652222");
         unFreezeAccountRq.setBankId("2");
         unFreezeAccountRq.setAccountUnFreezeRq_Customdata(unFreezeAccountRqCustomData);
+        UnFreezeAccountRsMockData unFreezeAccountRsMockData = new UnFreezeAccountRsMockData();
+        UnFreezeAccountRsMock unFreezeAccountRsMock = new UnFreezeAccountRsMock();
         UnFreezeAccountRs unFreezeAccountRs = new UnFreezeAccountRs();
         unFreezeAccountRs.setData("SUCCESS");
-        serviceResponse.setData(unFreezeAccountRs);
+        unFreezeAccountRsMock.setAccountUnFreezeRs(unFreezeAccountRs);
+        unFreezeAccountRsMockData.setData(unFreezeAccountRsMock);
+        serviceResponse.setData(unFreezeAccountRsMockData);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+        when(mapper.map(any(),eq(UnFreezeAccountRsMockData.class))).thenReturn(unFreezeAccountRsMockData);
+        accountServiceImpl.mapper = mapper;
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
@@ -221,9 +227,16 @@ public class AccountServiceTest {
         unFreezeAccountRq.setAccountId("00325652222");
         unFreezeAccountRq.setBankId("2");
         unFreezeAccountRq.setAccountUnFreezeRq_Customdata(unFreezeAccountRqCustomData);
+        UnFreezeAccountRsMockData unFreezeAccountRsMockData = new UnFreezeAccountRsMockData();
+        UnFreezeAccountRsMock unFreezeAccountRsMock = new UnFreezeAccountRsMock();
         UnFreezeAccountRs unFreezeAccountRs = new UnFreezeAccountRs();
         unFreezeAccountRs.setData("NO SE PUDO DESCONGELAR LA CUENTA");
-        serviceResponse.setData(unFreezeAccountRs);
+        unFreezeAccountRsMock.setAccountUnFreezeRs(unFreezeAccountRs);
+        unFreezeAccountRsMockData.setData(unFreezeAccountRsMock);
+        serviceResponse.setData(unFreezeAccountRsMockData);
+        ObjectMapper mapper = mock(ObjectMapper.class);
+        when(mapper.map(any(),eq(UnFreezeAccountRsMockData.class))).thenReturn(unFreezeAccountRsMockData);
+        accountServiceImpl.mapper = mapper;
         when(webClientMock.method(HttpMethod.DELETE)).thenReturn(requestBodyUriSpecMock);
         when(requestBodyUriSpecMock.uri("/1.0/banks/{bankId}/savings/accounts/{account}/freeze","2","00325652222")).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);

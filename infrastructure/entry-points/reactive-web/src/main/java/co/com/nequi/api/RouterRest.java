@@ -20,6 +20,6 @@ public class RouterRest {
                 .andRoute(POST("/api/customer/createCustomer"), handler::createCustomer)
                 .andRoute(POST("/api/customer/getCustomerDetails"), handler::getCustomerDetails)
                 .andRoute(POST("/api/account/freezeAccount"), accountHandler::freezeAccount)
-                 .andRoute(POST("/api/account/unfreezeAccount"), accountHandler::unFreezeAccount);
+                 .andRoute(DELETE("/api/account/unfreezeAccount"), accountHandler::unFreezeAccount);
     }
 }

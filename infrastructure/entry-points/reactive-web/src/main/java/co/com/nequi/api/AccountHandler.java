@@ -2,16 +2,12 @@ package co.com.nequi.api;
 
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
-import co.com.nequi.model.account.dto.FreezeAccountRqDto;
-import co.com.nequi.model.account.dto.UnFreezeAccountBrokerRQ;
-import co.com.nequi.model.account.dto.UnFreezeAccountRq;
-import co.com.nequi.model.account.dto.UnFreezeAccountRqCustomData;
+import co.com.nequi.model.account.dto.*;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
 import co.com.nequi.usecase.unfreezeaccount.UnFreezeAccountUseCase;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -52,10 +48,10 @@ public class AccountHandler {
         return unfreezeAccountRqDtoMono
                 .flatMap(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-                    UnFreezeAccountBrokerRQ unFreezeAccountBrokerRQ = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), UnFreezeAccountBrokerRQ.class);
-                    UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = UnFreezeAccountRqCustomData.builder().freezeReasonCode(unFreezeAccountBrokerRQ.getReasonCode()).build();
-                    unFreezeAccountRqCustomData.setFreezeReasonCode(unFreezeAccountBrokerRQ.getReasonCode());
-                    UnFreezeAccountRq freezeAccountRQ = UnFreezeAccountRq.builder().accountId(unFreezeAccountBrokerRQ.getAccountNumber()).bankId("1")
+                    UnFreezeAccountBrokerRQMock unFreezeAccountBrokerRQ = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), UnFreezeAccountBrokerRQMock.class);
+                    UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = UnFreezeAccountRqCustomData.builder().freezeReasonCode(unFreezeAccountBrokerRQ.getUnfreezeAccountBrokerRQ().getReasonCode()).build();
+                    unFreezeAccountRqCustomData.setFreezeReasonCode(unFreezeAccountBrokerRQ.getUnfreezeAccountBrokerRQ().getReasonCode());
+                    UnFreezeAccountRq freezeAccountRQ = UnFreezeAccountRq.builder().accountId(unFreezeAccountBrokerRQ.getUnfreezeAccountBrokerRQ().getAccountNumber()).bankId("1")
                             .accountUnFreezeRq_Customdata(unFreezeAccountRqCustomData).build();
                     mdw.getRequestHeaderOut().getBody().setAny(freezeAccountRQ);
                     return unFreezeAccountUseCase.unFreezeAccount(mdw);

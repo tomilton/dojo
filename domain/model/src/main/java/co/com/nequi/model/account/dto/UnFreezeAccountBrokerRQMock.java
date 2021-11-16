@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @Setter
 @ToString
-public class UnFreezeAccountBrokerRQ {
-    private String accountNumber;
-    private String reasonCode;
+public class UnFreezeAccountBrokerRQMock {
+    private UnFreezeAccountBrokerRQ unfreezeAccountBrokerRQ;
 }

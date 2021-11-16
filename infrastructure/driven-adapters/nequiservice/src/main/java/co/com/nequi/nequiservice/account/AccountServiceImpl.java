@@ -70,8 +70,8 @@ public class AccountServiceImpl implements AccountService {
                 .bodyToMono(FinacleResponse.class)
                 .onErrorMap(throwable -> new AccountOperationException(throwable.getMessage()));
         return finacleResponse.map(response -> {
-            UnFreezeAccountRs unFreezeAccountRs = (UnFreezeAccountRs) response.getData();
-            return new UnFreezeAccountRsService(unFreezeAccountRs.getData());
+            UnFreezeAccountRsMockData unFreezeAccountRs = mapper.map(response.getData(), UnFreezeAccountRsMockData.class);
+            return new UnFreezeAccountRsService(unFreezeAccountRs.getData().getAccountUnFreezeRs().getData());
         });
     }
 

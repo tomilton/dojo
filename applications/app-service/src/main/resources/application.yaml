@@ -23,4 +23,4 @@ traceconfig:
 finacle:
   uri:
    freezeAccount: "/V1/banks/{bankId}/savings/FreezeAccount"
-   unfreezeAccount: "/1.0/banks/{bankId}/savings/accounts/{account}/freeze"
+   unfreezeAccount: "/V1.0/banks/{bankId}/savings/accounts/{account}/freeze"

@@ -3,20 +3,11 @@ package com.com.nequi.api.handler;
 import co.com.nequi.api.AccountHandler;
 import co.com.nequi.api.config.ReflectionUtils;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
-import co.com.nequi.api.requestmdw.RequestHeaderOut;
-import co.com.nequi.api.requestmdw.Header;
-import co.com.nequi.api.requestmdw.Destination;
-import co.com.nequi.api.requestmdw.SecurityCredential;
-import co.com.nequi.api.requestmdw.MessageContext;
-import co.com.nequi.api.requestmdw.Property;
-import co.com.nequi.api.requestmdw.Item;
-import co.com.nequi.api.requestmdw.Body;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.account.dto.*;
 import co.com.nequi.model.requestmdw.*;
 import co.com.nequi.model.responsemdw.ResponseHeaderOut;
 import co.com.nequi.model.responsemdw.ResponseMdw;
-import co.com.nequi.trace.TraceAdapter;
 import co.com.nequi.usecase.freezeaccount.FreezeAccountUseCase;
 import co.com.nequi.usecase.unfreezeaccount.UnFreezeAccountUseCase;
 import com.com.nequi.api.handler.dataprovider.DataProviderRequest;
@@ -34,10 +25,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,12 +78,14 @@ public class AccountHandlerTest {
     @Test
     public void unFreezeAccountRequest() throws Exception {
         UnFreezeAccountBrokerRQ unFreezeAccountBrokerRQ = new UnFreezeAccountBrokerRQ("0100232484","14");
+        UnFreezeAccountBrokerRQMock unFreezeAccountBrokerRQMock = new UnFreezeAccountBrokerRQMock();
+        unFreezeAccountBrokerRQMock.setUnfreezeAccountBrokerRQ(unFreezeAccountBrokerRQ);
         RequestJsonMdw requestMdw = DataProviderRequest.buildRequestUnFreezeAccountDefaultTest((unFreezeAccountBrokerRQ));
         ServerRequest serverRequestMock = mock(ServerRequest.class);
         ObjectMapper mapper = mock(ObjectMapper.class);
         when(serverRequestMock.bodyToMono(RequestJsonMdw.class)).thenReturn(Mono.just(requestMdw));
         when(mapper.map(any(),eq(RequestMdw.class))).thenReturn(buildRequestMdw());
-        when(mapper.map(any(),eq(UnFreezeAccountBrokerRQ.class))).thenReturn(buildUnFreezeAccountBrokerRQ());
+        when(mapper.map(any(),eq(UnFreezeAccountBrokerRQMock.class))).thenReturn(buildUnFreezeAccountBrokerRQMock());
         when(mapper.map(any(),eq(ResponseJsonMdw.class))).thenReturn(buildResponseJsonMdwOK());
         when(unFreezeAccountUseCase.unFreezeAccount(any())).thenReturn(Mono.just(buildResponseMdw()));
         ReflectionUtils.setFinalStaticField(AccountHandler.class, "mapper", mapper,accountHandler);
@@ -149,8 +138,10 @@ public class AccountHandlerTest {
         return dtoRequest;
     }
 
-    private UnFreezeAccountBrokerRQ buildUnFreezeAccountBrokerRQ(){
-        return new UnFreezeAccountBrokerRQ("0100232484","14");
+    private UnFreezeAccountBrokerRQMock buildUnFreezeAccountBrokerRQMock(){
+        UnFreezeAccountBrokerRQMock unFreezeAccountBrokerRQ = new UnFreezeAccountBrokerRQMock();
+        unFreezeAccountBrokerRQ.setUnfreezeAccountBrokerRQ(new UnFreezeAccountBrokerRQ("0100232484","14"));
+        return unFreezeAccountBrokerRQ;
     }
 
 }
