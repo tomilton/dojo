@@ -39,9 +39,7 @@ public class TemplateDynamoDBRepository {
         return templateDynamoDbAsyncTable.deleteItem(getKeyBuild(id));
     }
 
-    public PagePublisher<TemplateEntity> getAll() {
-        return templateDynamoDbAsyncTable.scan();
-    }
+    public PagePublisher<TemplateEntity> getAll() {return templateDynamoDbAsyncTable.scan();}
 
     private Key getKeyBuild(String templateId) {
         return Key.builder()

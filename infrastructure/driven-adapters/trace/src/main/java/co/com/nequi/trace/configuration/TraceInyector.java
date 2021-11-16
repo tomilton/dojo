@@ -14,8 +14,6 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:application.properties")
 public class TraceInyector {
 
-    @Autowired
-    public PropertiesConfig propertiesConfig;
     @Value("${traceconfig.type}")
     public String typeConfig;
 
