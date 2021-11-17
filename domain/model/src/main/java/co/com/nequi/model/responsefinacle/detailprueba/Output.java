@@ -1,9 +1,13 @@
-package co.com.nequi.model.responsefinacle.customer;
+package co.com.nequi.model.responsefinacle.detailprueba;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
-@lombok.Data
-public class OutputDataData {
+@Getter
+@Setter
+public class Output {
 
     private String status;
     private String cifID;

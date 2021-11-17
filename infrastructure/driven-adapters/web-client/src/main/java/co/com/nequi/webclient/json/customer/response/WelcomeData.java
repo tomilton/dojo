@@ -1,19 +1,16 @@
 package co.com.nequi.webclient.json.customer.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class WelcomeData {
 
+    @JsonProperty("meta")
     private Meta meta;
+    @JsonProperty("data")
     private DataData data;
 
-    @JsonProperty("meta")
-    public Meta getMeta() { return meta; }
-    @JsonProperty("meta")
-    public void setMeta(Meta value) { this.meta = value; }
-
-    @JsonProperty("data")
-    public DataData getData() { return data; }
-    @JsonProperty("data")
-    public void setData(DataData value) { this.data = value; }
 }

@@ -1,12 +1,13 @@
 package co.com.nequi.usecase.getcustomerdetail;
 
-import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customer.gateways.LoggerCustomer;
-import co.com.nequi.model.exceptions.CreateCustomerException;
 import co.com.nequi.model.requestmdw.RequestMdw;
-import co.com.nequi.model.responsefinacle.customer.*;
+import co.com.nequi.model.responsefinacle.detailprueba.CustomerDetailResponse;
+import co.com.nequi.model.responsefinacle.detailprueba.ErrorDetail;
+import co.com.nequi.model.responsefinacle.detailprueba.Meta;
+import co.com.nequi.model.responsefinacle.detailprueba.OutputDataData;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
@@ -24,26 +25,17 @@ public class GetCustomerDetailUseCase {
     private final LoggerCustomer loggerCustomer;
 
     public Mono<ResponseMdw> getCustomerDetail(RequestMdw requestMdw){
-        try{
-            CustomerDetailReq customerDetailReq = (CustomerDetailReq) requestMdw.getRequestHeaderOut().getBody().getAny();
-            Mono<CustomerDetailResponseFinacle> responseFinacleMono =customerServiceFinacle.getCustomerDetail(customerDetailReq);
 
-            return responseFinacleMono
-                    .onErrorResume(e -> Mono.just(buildErrorFinacle("", e.getMessage())))
-                    .flatMap(finacle -> {
-                        loggerCustomer.info("finacle: " + finacle);;
-                        List<ErrorDetail> errorDetails = finacle.getMeta().getErrorDetails();
-                        if(errorDetails.isEmpty()){
-                            return Mono.empty();
-                        } else {
-                            return Mono.just(buildResponseSucces(finacle.getData().getData().getInquireDetailsRsCustomdata().getData().getOutputData().getData(), requestMdw));
-                        }
-                    });
-        } catch (CreateCustomerException runtimeException) {
-            return Mono.just(this.buildResponseWithError(requestMdw, runtimeException.getMessage()));
-        } catch (Exception exception) {
-            return Mono.just(this.buildResponseWithError(requestMdw, exception.getMessage()));
-        }
+        CustomerDetailReq customerDetailReq = (CustomerDetailReq) requestMdw.getRequestHeaderOut().getBody().getAny();
+        return customerServiceFinacle.getCustomerDetail(customerDetailReq).log()
+                .doOnError(e -> {
+                    loggerCustomer.info("Error");
+                    //Mono.just(new CustomerDetailResponse());
+                })
+                .flatMap(finacle -> {
+                    loggerCustomer.info("finacle: " + finacle);
+                    return Mono.just(buildResponseSucces(finacle.getData().getData().getInquireDetailsRsCustomdata().getOutputData().getData(), requestMdw));
+                });
     }
 
     private ResponseMdw buildResponseSucces(OutputDataData customer, RequestMdw requestMdw) {
@@ -74,8 +66,8 @@ public class GetCustomerDetailUseCase {
         return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
     }
 
-    private CustomerDetailResponseFinacle buildErrorFinacle(String errorcode, String errordesc) {
-        CustomerDetailResponseFinacle customerResponseFinacle = new CustomerDetailResponseFinacle();
+    private CustomerDetailResponse buildErrorFinacle(String errorcode, String errordesc) {
+        CustomerDetailResponse customerResponseFinacle = new CustomerDetailResponse();
         customerResponseFinacle.setMeta(new Meta());
         ErrorDetail errorDetail = new ErrorDetail();
         errorDetail.setErrorcode(errorcode);

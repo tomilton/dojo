@@ -95,17 +95,19 @@ public class Handler {
 
         return requestMdwMono
                 .map(requestMdw -> {
-                    logger.info(requestMdw.getOmitXMLDeclaration());
-
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
                     mdw.getRequestHeaderOut().getBody().setAny(customerDetailReq);
                     return getCustomerDetailUseCase.getCustomerDetail(mdw);
                 })
+                .map(responseMdw -> {
+                    ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
+                    return mdw;
+                })
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/getCustomerDetails"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(fromObject(sr))
+                        .body(fromValue(sr))
                 );
     }
 
