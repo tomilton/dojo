@@ -11,7 +11,7 @@ public class PersonalInfo {
     private String idNumber;
     private City secondIDNumber;
     private City expeditionDate;
-    private LocalDate birthDate;
+    private String birthDate;
     private String email;
     private City nickName;
     private String typeID;
@@ -57,9 +57,9 @@ public class PersonalInfo {
     public void setExpeditionDate(City value) { this.expeditionDate = value; }
 
     @JsonProperty("birthDate")
-    public LocalDate getBirthDate() { return birthDate; }
+    public String getBirthDate() { return birthDate; }
     @JsonProperty("birthDate")
-    public void setBirthDate(LocalDate value) { this.birthDate = value; }
+    public void setBirthDate(String value) { this.birthDate = value; }
 
     @JsonProperty("email")
     public String getEmail() { return email; }

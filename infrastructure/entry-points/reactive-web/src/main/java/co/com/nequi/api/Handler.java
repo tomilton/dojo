@@ -64,29 +64,6 @@ public class Handler {
                 );
     }
 
-    public Mono<ServerResponse> createCustomer(ServerRequest request) {
-        Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
-        return requestMdwMono
-                .map(requestMdw -> {
-                    RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-                    Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
-                    mdw.getRequestHeaderOut().getBody().setAny(customer);
-                    return mdw;
-                })
-                .flatMap(createCustomerUseCase::execute)
-                .map(responseMdw -> {
-                    ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
-                    CustomerJsonMdwRs brokerRS = mapper.map(mdw.getResponseHeaderOut().getBody().getAny(), CustomerJsonMdwRs.class);
-                    mdw.getResponseHeaderOut().getBody().setAny(brokerRS);
-                    return mdw;
-                })
-                .flatMap(sr -> ServerResponse
-                        .ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(fromValue(sr))
-                );
-    }
-
     public Mono<ServerResponse> getCustomerDetails(ServerRequest request) {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
 
