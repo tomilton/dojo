@@ -45,8 +45,7 @@ public class CreateCustomerUseCase {
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
         return requestFinacle.flatMap(responseFinacle -> handleResponseFinacle(responseFinacle, requestMdw)
-                ).doOnError(error -> System.out.println("Customer Trace: " + error.getMessage()))
-                .onErrorResume(error -> handleErrors(error, requestMdw));
+        ).onErrorResume(error -> handleErrors(error, requestMdw));
     }
 
 
@@ -229,14 +228,18 @@ public class CreateCustomerUseCase {
                 .relationshipManagerID("officia consec")
                 .relationshipManagerName("dolor mollit")
                 .primary("in enim id").department("mollit Ut ipsum")
-                .rowStatus("m").build());
+                .rowStatus(Constant.ROW_STATUS_ADDED).build());
         return infoList;
     }
 
     private List<EmailDetail> buildEmailDetails() {
         List<EmailDetail> infoList = new ArrayList<>();
-        infoList.add(EmailDetail.builder().emailID("labo").emailType("in officia anim D")
-                .preferred("sit").rowStatus("ull").build());
+        infoList.add(EmailDetail.builder()
+                .emailID("labo")
+                .emailType("in officia anim D")
+                .preferred("sit")
+                .rowStatus("ull")
+                .build());
         return infoList;
     }
 
