@@ -2,8 +2,6 @@ package co.com.nequi.api.responsemdw;
 
 import com.fasterxml.jackson.annotation.*;
 
-import java.time.OffsetDateTime;
-
 public class Header {
     private String systemID;
     private String messageID;

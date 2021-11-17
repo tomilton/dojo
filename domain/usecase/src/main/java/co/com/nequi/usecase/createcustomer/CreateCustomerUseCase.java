@@ -5,7 +5,6 @@ import co.com.nequi.model.customer.CustomerRS;
 import co.com.nequi.model.customer.LiteRegistryBrokerRQ;
 import co.com.nequi.model.customer.LiteRegistryBrokerRS;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
-import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
 import co.com.nequi.model.exceptions.CastCustomerException;
@@ -29,8 +28,6 @@ import java.util.List;
 public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestMdw> {
 
     private final CustomerServiceFinacle customerServiceFinacle;
-
-    private final LoggerCustomer loggerCustomer;
 
     private final CustomerDefaultDataRepository defaultDataRepository;
 
