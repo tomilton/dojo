@@ -73,7 +73,7 @@ public class Handler {
                     mdw.getRequestHeaderOut().getBody().setAny(customer);
                     return mdw;
                 })
-                .flatMap(createCustomerUseCase::createCustomer)
+                .flatMap(createCustomerUseCase::execute)
                 .map(responseMdw -> {
                     ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
                     CustomerJsonMdwRs brokerRS = mapper.map(mdw.getResponseHeaderOut().getBody().getAny(), CustomerJsonMdwRs.class);
@@ -96,7 +96,7 @@ public class Handler {
 
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
 
-                    return createCustomerUseCase.createCustomer(mdw);
+                    return createCustomerUseCase.execute(mdw);
                 })
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/createCustomer"))

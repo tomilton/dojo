@@ -53,7 +53,7 @@ class CreateCustomerUseCaseTest {
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
 
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(responseParam -> {
 
@@ -72,7 +72,7 @@ class CreateCustomerUseCaseTest {
         List<CustomerDefaultData> defaultDataList = new ArrayList<>();
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(responseParam -> {
 
@@ -90,7 +90,7 @@ class CreateCustomerUseCaseTest {
         List<CustomerDefaultData> defaultDataList = new ArrayList<>();
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.error(new CreateCustomerFinacleException("Error Finacle")));
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(response -> {
 
@@ -108,7 +108,7 @@ class CreateCustomerUseCaseTest {
         CustomerResponseFinacle responseFinacle = DatosResponseFinacle.buildCustomerResponseSuccess();
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.error(new DefaultDataException("Error DefaultData")));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(response -> {
 

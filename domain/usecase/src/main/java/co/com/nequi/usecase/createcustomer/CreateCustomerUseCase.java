@@ -15,6 +15,7 @@ import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
 import co.com.nequi.model.responsefinacle.customer.ErrorDetail;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
+import co.com.nequi.usecase.createcustomer.helper.AbstractUseCase;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
 import co.com.nequi.usecase.createcustomer.util.UtilString;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class CreateCustomerUseCase {
+public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestMdw> {
 
     private final CustomerServiceFinacle customerServiceFinacle;
 
@@ -33,7 +34,7 @@ public class CreateCustomerUseCase {
 
     private final CustomerDefaultDataRepository defaultDataRepository;
 
-    public Mono<ResponseMdw> createCustomer(RequestMdw requestMdw) {
+    public Mono<ResponseMdw> execute(RequestMdw requestMdw) {
 
         Mono<Customer> customerMono = getCustomer(requestMdw);
 
