@@ -5,7 +5,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 import java.util.List;
-import java.util.Objects;
 
 @DynamoDbBean
 public class TemplateEntity {

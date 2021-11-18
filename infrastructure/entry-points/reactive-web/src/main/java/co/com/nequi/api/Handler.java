@@ -1,10 +1,7 @@
 package co.com.nequi.api;
 
-import co.com.nequi.api.models.createcustomer.CustomerJsonMdwRs;
-import co.com.nequi.api.models.createcustomer.LiteRegistryBrokerRS;
+
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
-import co.com.nequi.api.responsemdw.ResponseJsonMdw;
-import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
@@ -22,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Component
@@ -77,8 +73,8 @@ public class Handler {
                 })
                 .flatMap(sr -> ServerResponse
                         .created(URI.create("/api/customer/createCustomer"))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .body(fromObject(sr))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(fromValue(sr))
                 );
     }
 
