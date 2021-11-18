@@ -16,13 +16,19 @@ import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.helper.AbstractUseCase;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
-import co.com.nequi.usecase.createcustomer.util.UtilObject;
-import co.com.nequi.usecase.createcustomer.util.UtilString;
+import co.com.nequi.usecase.util.UtilObject;
+import co.com.nequi.usecase.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
 
+
+/**
+ * Name: Customer
+ * Namespace: http://co.bancaDigital/nequi/services/UserServices/Customer/v1.0
+ * Operation: createCustomer
+ */
 @RequiredArgsConstructor
 public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestMdw> {
 
@@ -31,22 +37,47 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
     private Map<String, String> mapProperties = new HashMap<>();
 
 
+    /**
+     * Flujo principal
+     *
+     * @param requestMdw
+     * @return
+     */
     public Mono<ResponseMdw> execute(RequestMdw requestMdw) {
-
+        /**
+         * Datos de middleware, se pasan a Mono
+         */
         Mono<Customer> customerMono = getCustomer(requestMdw);
 
+        /**
+         * Se consultan los datos por defecto
+         */
         Mono<List<CustomerDefaultData>> defaultDataFlux = defaultDataRepository.getDefaultData("1").collectList();
 
+        /**
+         * Se combinan los datos por defecto y los datos del middleware para enviarselos a finacle
+         */
         Mono<CustomerRequestFinacle> requestFinacleMono = customerMono
                 .zipWith(defaultDataFlux).map(tuple -> buildRequestFinacle(tuple.getT1(), tuple.getT2()));
 
+        /**
+         * Respuesta de finacle
+         */
         Mono<CustomerResponseFinacle> requestFinacle = requestFinacleMono.flatMap(customerServiceFinacle::save);
 
+        /**
+         * Se retorna la respuesta a middleware
+         */
         return requestFinacle.flatMap(responseFinacle -> handleResponseFinacle(responseFinacle, requestMdw)
         ).onErrorResume(error -> handleErrors(error, requestMdw));
     }
 
-
+    /**
+     * Retorna un Mono del customer enviado por parametro.
+     *
+     * @param requestMdw
+     * @return
+     */
     private Mono<Customer> getCustomer(RequestMdw requestMdw) {
         Customer customer = (Customer) requestMdw.getRequestHeaderOut().getBody().getAny();
         if (customer.getLiteRegistryBrokerRQ() == null
@@ -56,6 +87,15 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return Mono.just(customer);
     }
 
+    /**
+     * Hace el manejo de la respuesta de finacle.
+     * En caso de error se debe revisar <ErrorDetail> notifica a middleware.
+     * En caso de exito se envia en el any la respuesta.
+     *
+     * @param responseFinacle
+     * @param requestMdw
+     * @return
+     */
     private Mono<ResponseMdw> handleResponseFinacle(CustomerResponseFinacle responseFinacle, RequestMdw requestMdw) {
         List<ErrorDetail> errorDetails = responseFinacle.getMeta().getErrorDetails();
         if (errorDetails.isEmpty()) {
@@ -69,10 +109,24 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Captura los errores, estos pueden venir desde el casteo, defaultdata, finacle, negocio
+     *
+     * @param error
+     * @param requestMdw
+     * @return
+     */
     private Mono<ResponseMdw> handleErrors(Throwable error, RequestMdw requestMdw) {
         return Mono.just(this.buildResponseWithError(requestMdw, error.getMessage()));
     }
 
+    /**
+     * Construye la respuesta para notificarle a middleware
+     *
+     * @param any
+     * @param requestMdw
+     * @return
+     */
     private ResponseMdw buildResponseSucces(Object any, RequestMdw requestMdw) {
         Destination destination = BuildMessageUtil.buildDestination(
                 requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
@@ -87,6 +141,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
     }
 
+    /**
+     * Construye la respuesta con el error para notificarle a middleware
+     *
+     * @param requestMdw
+     * @param error
+     * @return
+     */
     private ResponseMdw buildResponseWithError(RequestMdw requestMdw, String error) {
         Destination destination = BuildMessageUtil.buildDestination(
                 requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
@@ -101,6 +162,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
     }
 
+    /**
+     * Fija los datos para hacer la peticion a finacle
+     *
+     * @param customer
+     * @param defaultData
+     * @return
+     */
     private CustomerRequestFinacle buildRequestFinacle(Customer customer, List<CustomerDefaultData> defaultData) {
         LiteRegistryBrokerRQ middleware = customer.getLiteRegistryBrokerRQ();
         middleware.getPersonalInfo().validarIdNumber();
@@ -132,6 +200,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return requestFinacle;
     }
 
+    /**
+     * Fija los objetos de tipo lista para hacer la peticion a finacle
+     *
+     * @param requestFinacle
+     * @param middleware
+     */
     private void buildListsFinacle(final CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ middleware) {
         requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
         requestFinacle.setEmailDetails(buildEmailDetails(middleware));
@@ -146,6 +220,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         requestFinacle.setCurrencyDetails(buildCurrencyDetails());
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param requestFinacle
+     * @param middleware
+     * @return
+     */
     private String getFirstName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ middleware) {
         String name1 = middleware.getPersonalInfo().getName1();
         if (UtilString.cadenaVacia(requestFinacle.getFirstname()) && !UtilString.cadenaVacia(name1)) {
@@ -155,6 +236,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param requestFinacle
+     * @param liteRegistryBrokerRQ
+     * @return
+     */
     private String getMotherMaidenName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
         String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
         if (UtilString.cadenaVacia(requestFinacle.getMotherMaidenName()) && !UtilString.cadenaVacia(motherMaidenName)) {
@@ -164,6 +252,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param requestFinacle
+     * @param liteRegistryBrokerRQ
+     * @return
+     */
     private String getDob(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
         String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
         if (UtilString.cadenaVacia(requestFinacle.getDob()) && !UtilString.cadenaVacia(birthDate)) {
@@ -173,6 +268,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param requestFinacle
+     * @param liteRegistryBrokerRQ
+     * @return
+     */
     private String getLastName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
         String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
         if (UtilString.cadenaVacia(requestFinacle.getLastname()) && !UtilString.cadenaVacia(lastName)) {
@@ -182,6 +284,13 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param requestFinacle
+     * @param liteRegistryBrokerRQ
+     * @return
+     */
     private String getMiddleName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
         String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
         if (UtilString.cadenaVacia(requestFinacle.getMiddlename()) && !UtilString.cadenaVacia(name2)) {
@@ -191,6 +300,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param middleware
+     * @return
+     */
     private String getCityAddress(LiteRegistryBrokerRQ middleware) {
         if (UtilObject.isNotNull(middleware.getPersonalInfo().getCity())) {
             return middleware.getPersonalInfo().getCity().toString();
@@ -199,6 +314,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param middleware
+     * @return
+     */
     private String getStateAddress(LiteRegistryBrokerRQ middleware) {
         String state = middleware.getPersonalInfo().getState();
         if (!UtilString.cadenaVacia(state)) {
@@ -208,6 +329,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param middleware
+     * @return
+     */
     private String getAddressLabel(LiteRegistryBrokerRQ middleware) {
         String addresLabel = middleware.getPersonalInfo().getAddress();
         if (!UtilString.cadenaVacia(addresLabel)) {
@@ -217,6 +344,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param middleware
+     * @return
+     */
     private String getDocumentNumber(LiteRegistryBrokerRQ middleware) {
         String idNumber = middleware.getPersonalInfo().getIDNumber();
         if (!UtilString.cadenaVacia(idNumber)) {
@@ -226,6 +359,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Valida el dato , antes de fijarlo a la propiedad para finacle, si esta vacio envia el valor por defecto
+     *
+     * @param middleware
+     * @return
+     */
     private String getDocumentType(LiteRegistryBrokerRQ middleware) {
         String typeID = middleware.getPersonalInfo().getTypeID();
         if (!UtilString.cadenaVacia(typeID)) {
@@ -235,6 +374,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         }
     }
 
+    /**
+     * Construye la lista de RelationshipmanagerInfo para enviar a finacle
+     *
+     * @return List<RelationshipmanagerInfo>
+     */
     private List<RelationshipmanagerInfo> buildRelationshipmanagerInfo() {
         List<RelationshipmanagerInfo> infoList = new ArrayList<>();
         infoList.add(RelationshipmanagerInfo.builder()
@@ -245,6 +389,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return infoList;
     }
 
+    /**
+     * Construye la lista de EmailDetail para enviar a finacle
+     *
+     * @param middleware
+     * @return
+     */
     private List<EmailDetail> buildEmailDetails(LiteRegistryBrokerRQ middleware) {
         List<EmailDetail> infoList = new ArrayList<>();
         infoList.add(EmailDetail.builder()
@@ -256,6 +406,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return infoList;
     }
 
+    /**
+     * Construye la lista de PhoneDetail para enviar a finacle
+     *
+     * @param middleware
+     * @return
+     */
     private List<PhoneDetail> buildPhoneDetails(LiteRegistryBrokerRQ middleware) {
         List<PhoneDetail> phoneDetails = new ArrayList<>();
         phoneDetails.add(PhoneDetail.builder()
@@ -269,6 +425,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return phoneDetails;
     }
 
+    /**
+     * Construye la lista de Address para enviar a finacle
+     *
+     * @param middleware
+     * @return
+     */
     private List<Address> buildAddresses(LiteRegistryBrokerRQ middleware) {
         List<Address> addresses = new ArrayList<>();
         addresses.add(Address.builder()
@@ -297,6 +459,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return addresses;
     }
 
+    /**
+     * Construye la lista de AlternateLanguage para enviar a finacle
+     *
+     * @return List<AlternateLanguage>
+     */
     private List<AlternateLanguage> buildAlternateLanguages() {
         List<AlternateLanguage> alternateLanguages = new ArrayList<>();
         alternateLanguages.add(AlternateLanguage.builder()
@@ -307,6 +474,12 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return alternateLanguages;
     }
 
+    /**
+     * Construye la lista de IdentificationDocument para enviar a finacle
+     *
+     * @param middleware
+     * @return List<IdentificationDocument>
+     */
     private List<IdentificationDocument> buildIdentificationDocuments(LiteRegistryBrokerRQ middleware) {
         List<IdentificationDocument> identificationDocuments = new ArrayList<>();
         identificationDocuments.add(
@@ -327,6 +500,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
     }
 
 
+    /**
+     * Construye la lista de EmploymentDetail para enviar a finacle
+     *
+     * @return
+     */
     private List<EmploymentDetail> buildEmploymentDetails() {
         List<EmploymentDetail> employmentDetails = new ArrayList<>();
         employmentDetails.add(
@@ -350,6 +528,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return employmentDetails;
     }
 
+    /**
+     * Construye la lista de RetailIncome para enviar a finacle
+     *
+     * @return
+     */
     private List<RetailIncome> buildRetailIncome() {
         List<RetailIncome> retailIncomes = new ArrayList<>();
         retailIncomes.add(
@@ -364,6 +547,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return retailIncomes;
     }
 
+    /**
+     * Construye la lista de RetailExpense para enviar a finacle
+     *
+     * @return
+     */
     private List<RetailExpense> buildRetailExpense() {
         List<RetailExpense> retailExpenses = new ArrayList<>();
         retailExpenses.add(
@@ -378,6 +566,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return retailExpenses;
     }
 
+    /**
+     * Construye la lista de BankStaff para enviar a finacle
+     *
+     * @return
+     */
     private List<BankStaff> buildBankStaffs() {
         List<BankStaff> bankStaffs = new ArrayList<>();
         bankStaffs.add(
@@ -392,6 +585,11 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return bankStaffs;
     }
 
+    /**
+     * Construye la lista de CurrencyDetail para enviar a finacle
+     *
+     * @return
+     */
     private List<CurrencyDetail> buildCurrencyDetails() {
         List<CurrencyDetail> currencyDetails = new ArrayList<>();
         currencyDetails.add(

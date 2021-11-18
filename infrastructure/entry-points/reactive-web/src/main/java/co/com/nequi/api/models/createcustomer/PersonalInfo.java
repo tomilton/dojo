@@ -1,7 +1,6 @@
 package co.com.nequi.api.models.createcustomer;
 
 import com.fasterxml.jackson.annotation.*;
-import java.time.LocalDate;
 
 public class PersonalInfo {
     private String name1;

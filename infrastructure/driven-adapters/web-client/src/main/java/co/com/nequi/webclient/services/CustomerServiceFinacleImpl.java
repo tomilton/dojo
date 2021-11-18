@@ -8,8 +8,6 @@ import co.com.nequi.webclient.json.customer.request.CustomerRequestJSON;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
 import org.reactivecommons.utils.ObjectMapper;
 import org.reactivecommons.utils.ObjectMapperImp;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package co.com.nequi.usecase.createcustomer.util;
+package co.com.nequi.usecase.util;
 
 public class UtilString {
 
