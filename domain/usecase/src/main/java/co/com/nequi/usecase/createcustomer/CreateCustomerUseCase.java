@@ -16,20 +16,20 @@ import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.createcustomer.constant.Constant;
 import co.com.nequi.usecase.createcustomer.helper.AbstractUseCase;
 import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
+import co.com.nequi.usecase.createcustomer.util.UtilObject;
 import co.com.nequi.usecase.createcustomer.util.UtilString;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestMdw> {
 
     private final CustomerServiceFinacle customerServiceFinacle;
-
     private final CustomerDefaultDataRepository defaultDataRepository;
+    private Map<String, String> mapProperties = new HashMap<>();
+
 
     public Mono<ResponseMdw> execute(RequestMdw requestMdw) {
 
@@ -73,125 +73,6 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return Mono.just(this.buildResponseWithError(requestMdw, error.getMessage()));
     }
 
-    private CustomerRequestFinacle buildRequestFinacle(Customer customer, List<CustomerDefaultData> defaultData) {
-        LiteRegistryBrokerRQ middleware = customer.getLiteRegistryBrokerRQ();
-        middleware.getPersonalInfo().validarIdNumber();
-        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
-        defaultData.forEach(item -> {
-            switch (item.getNombre()) {
-                case "CustStatus":
-                    requestFinacle.setCifStatus(item.getValorDefecto());
-                    break;
-                case "CustType":
-                    requestFinacle.setCustType(item.getValorDefecto());
-                    break;
-                case "BirthDt":
-                    requestFinacle.setDob(getDob(requestFinacle, middleware));
-                    break;
-                case "ShortName":
-                    requestFinacle.setShortName(item.getValorDefecto());
-                    break;
-                case "CustMinorInd":
-                    requestFinacle.setMinor(item.getValorDefecto());
-                    break;
-                case "NRCustInd":
-                    requestFinacle.setTaxResident(item.getValorDefecto());
-                    break;
-                case "FirstName":
-                    requestFinacle.setFirstname(item.getValorDefecto());
-                    break;
-                case "MiddleName":
-                    requestFinacle.setMiddlename(getMiddleName(requestFinacle, middleware, item));
-                    break;
-                case "LastName":
-                    requestFinacle.setLastname(getLastName(requestFinacle, middleware, item));
-                    break;
-                case "MotherMaidenName":
-                    requestFinacle.setMotherMaidenName(getMotherMaidenName(requestFinacle, middleware, item));
-                    break;
-                case "Gender":
-                    requestFinacle.setGender(item.getValorDefecto());
-                    break;
-                case "RelationshipOpeningDt":
-                    requestFinacle.setRelStartDate(new Date().toString());
-                    break;
-                case "SegmentationClass":
-                    requestFinacle.setRetailSegment(item.getValorDefecto());
-                    break;
-                case "TitlePrefix":
-                    requestFinacle.setSaluation(item.getValorDefecto());
-                    break;
-                case "PrimaryServiceCenter":
-                    requestFinacle.setPrimaryBranch(item.getValorDefecto());
-                    break;
-                case "MaritalStatus":
-                    requestFinacle.setMaritalStatus(item.getValorDefecto());
-                    break;
-                case "Nationality":
-                    requestFinacle.setCountryofPrimaryCitizenship(item.getValorDefecto());
-                    break;
-                default:
-            }
-        });
-        buildListsFinacle(requestFinacle);
-        requestFinacle.setCifID("non ja");
-        requestFinacle.setSeniorCitizen("lab");
-        requestFinacle.setTaxIDType("ut non aute nostrud");
-        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
-        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
-        return requestFinacle;
-    }
-
-    private void buildListsFinacle(final CustomerRequestFinacle requestFinacle) {
-        requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
-        requestFinacle.setEmailDetails(buildEmailDetails());
-        requestFinacle.setPhoneDetails(buildPhoneDetails());
-        requestFinacle.setAddresses(buildAddresses());
-        requestFinacle.setAlternateLanguages(buildAlternateLanguages());
-        requestFinacle.setIdentificationDocuments(buildIdentificationDocuments());
-        requestFinacle.setEmploymentDetails(buildEmploymentDetails());
-        requestFinacle.setRetailIncome(buildRetailIncome());
-        requestFinacle.setRetailExpense(buildRetailExpense());
-        requestFinacle.setBankStaffs(buildBankStaffs());
-        requestFinacle.setCurrencyDetails(buildCurrencyDetails());
-    }
-
-    private String getMotherMaidenName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData item) {
-        String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
-        if (UtilString.cadenaVacia(requestFinacle.getMotherMaidenName()) && UtilString.cadenaVacia(motherMaidenName)) {
-            return motherMaidenName;
-        } else {
-            return item.getValorDefecto();
-        }
-    }
-
-    private String getDob(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
-        String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
-        if (UtilString.cadenaVacia(requestFinacle.getDob()) && !UtilString.cadenaVacia(birthDate)) {
-            return birthDate;
-        } else {
-            return "T00:00:00.000";
-        }
-    }
-
-    private String getLastName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData item) {
-        String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
-        if (UtilString.cadenaVacia(requestFinacle.getLastname()) && !UtilString.cadenaVacia(lastName)) {
-            return lastName;
-        } else {
-            return item.getValorDefecto();
-        }
-    }
-
-    private String getMiddleName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ, CustomerDefaultData defaultData) {
-        String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
-        if (UtilString.cadenaVacia(requestFinacle.getMiddlename()) && !UtilString.cadenaVacia(name2)) {
-            return name2;
-        } else {
-            return defaultData.getValorDefecto();
-        }
-    }
-
     private ResponseMdw buildResponseSucces(Object any, RequestMdw requestMdw) {
         Destination destination = BuildMessageUtil.buildDestination(
                 requestMdw.getRequestHeaderOut().getHeader().getDestination().getName(),
@@ -220,6 +101,140 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return BuildMessageUtil.buildResponse(responseHeaderOut, Constant.COMMON_STRING_YES);
     }
 
+    private CustomerRequestFinacle buildRequestFinacle(Customer customer, List<CustomerDefaultData> defaultData) {
+        LiteRegistryBrokerRQ middleware = customer.getLiteRegistryBrokerRQ();
+        middleware.getPersonalInfo().validarIdNumber();
+        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
+        defaultData.forEach(item -> mapProperties.put(item.getNombre(), item.getValorDefecto()));
+        requestFinacle.setCifStatus(mapProperties.get("CustStatus"));
+        requestFinacle.setCustType(mapProperties.get("CustType"));
+        requestFinacle.setDob(getDob(requestFinacle, middleware));
+        requestFinacle.setShortName(mapProperties.get("ShortName"));
+        requestFinacle.setMinor(mapProperties.get("CustMinorInd"));
+        requestFinacle.setTaxResident(mapProperties.get("NRCustInd"));
+        requestFinacle.setFirstname(getFirstName(requestFinacle, middleware));
+        requestFinacle.setMiddlename(getMiddleName(requestFinacle, middleware));
+        requestFinacle.setLastname(getLastName(requestFinacle, middleware));
+        requestFinacle.setMotherMaidenName(getMotherMaidenName(requestFinacle, middleware));
+        requestFinacle.setGender(mapProperties.get("Gender"));
+        requestFinacle.setRelStartDate(new Date().toString());
+        requestFinacle.setRetailSegment(mapProperties.get("SegmentationClass"));
+        requestFinacle.setSaluation(mapProperties.get("TitlePrefix"));
+        requestFinacle.setPrimaryBranch(mapProperties.get("PrimaryServiceCenter"));
+        requestFinacle.setMaritalStatus(mapProperties.get("MaritalStatus"));
+        requestFinacle.setCountryofPrimaryCitizenship("Nationality");
+        requestFinacle.setCifID("non ja");
+        requestFinacle.setSeniorCitizen("lab");
+        requestFinacle.setTaxIDType("ut non aute nostrud");
+        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
+        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
+        buildListsFinacle(requestFinacle, middleware);
+        return requestFinacle;
+    }
+
+    private void buildListsFinacle(final CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ middleware) {
+        requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
+        requestFinacle.setEmailDetails(buildEmailDetails(middleware));
+        requestFinacle.setPhoneDetails(buildPhoneDetails(middleware));
+        requestFinacle.setAddresses(buildAddresses(middleware));
+        requestFinacle.setAlternateLanguages(buildAlternateLanguages());
+        requestFinacle.setIdentificationDocuments(buildIdentificationDocuments(middleware));
+        requestFinacle.setEmploymentDetails(buildEmploymentDetails());
+        requestFinacle.setRetailIncome(buildRetailIncome());
+        requestFinacle.setRetailExpense(buildRetailExpense());
+        requestFinacle.setBankStaffs(buildBankStaffs());
+        requestFinacle.setCurrencyDetails(buildCurrencyDetails());
+    }
+
+    private String getFirstName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ middleware) {
+        String name1 = middleware.getPersonalInfo().getName1();
+        if (UtilString.cadenaVacia(requestFinacle.getFirstname()) && !UtilString.cadenaVacia(name1)) {
+            return name1;
+        } else {
+            return mapProperties.get("FirstName");
+        }
+    }
+
+    private String getMotherMaidenName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
+        String motherMaidenName = liteRegistryBrokerRQ.getPersonalInfo().getLastName2();
+        if (UtilString.cadenaVacia(requestFinacle.getMotherMaidenName()) && !UtilString.cadenaVacia(motherMaidenName)) {
+            return motherMaidenName;
+        } else {
+            return mapProperties.get("MotherMaidenName");
+        }
+    }
+
+    private String getDob(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
+        String birthDate = liteRegistryBrokerRQ.getPersonalInfo().getBirthDate();
+        if (UtilString.cadenaVacia(requestFinacle.getDob()) && !UtilString.cadenaVacia(birthDate)) {
+            return birthDate;
+        } else {
+            return "T00:00:00.000";
+        }
+    }
+
+    private String getLastName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
+        String lastName = liteRegistryBrokerRQ.getPersonalInfo().getLastName1();
+        if (UtilString.cadenaVacia(requestFinacle.getLastname()) && !UtilString.cadenaVacia(lastName)) {
+            return lastName;
+        } else {
+            return mapProperties.get("LastName");
+        }
+    }
+
+    private String getMiddleName(CustomerRequestFinacle requestFinacle, LiteRegistryBrokerRQ liteRegistryBrokerRQ) {
+        String name2 = liteRegistryBrokerRQ.getPersonalInfo().getName2();
+        if (UtilString.cadenaVacia(requestFinacle.getMiddlename()) && !UtilString.cadenaVacia(name2)) {
+            return name2;
+        } else {
+            return mapProperties.get("MiddleName");
+        }
+    }
+
+    private String getCityAddress(LiteRegistryBrokerRQ middleware) {
+        if (UtilObject.isNotNull(middleware.getPersonalInfo().getCity())) {
+            return middleware.getPersonalInfo().getCity().toString();
+        } else {
+            return mapProperties.get("City");
+        }
+    }
+
+    private String getStateAddress(LiteRegistryBrokerRQ middleware) {
+        String state = middleware.getPersonalInfo().getState();
+        if (!UtilString.cadenaVacia(state)) {
+            return state;
+        } else {
+            return mapProperties.get("State");
+        }
+    }
+
+    private String getAddressLabel(LiteRegistryBrokerRQ middleware) {
+        String addresLabel = middleware.getPersonalInfo().getAddress();
+        if (!UtilString.cadenaVacia(addresLabel)) {
+            return addresLabel;
+        } else {
+            return mapProperties.get("AddressLabel");
+        }
+    }
+
+    private String getDocumentNumber(LiteRegistryBrokerRQ middleware) {
+        String idNumber = middleware.getPersonalInfo().getIDNumber();
+        if (!UtilString.cadenaVacia(idNumber)) {
+            return idNumber;
+        } else {
+            return "";
+        }
+    }
+
+    private String getDocumentType(LiteRegistryBrokerRQ middleware) {
+        String typeID = middleware.getPersonalInfo().getTypeID();
+        if (!UtilString.cadenaVacia(typeID)) {
+            return typeID;
+        } else {
+            return "";
+        }
+    }
+
     private List<RelationshipmanagerInfo> buildRelationshipmanagerInfo() {
         List<RelationshipmanagerInfo> infoList = new ArrayList<>();
         infoList.add(RelationshipmanagerInfo.builder()
@@ -230,49 +245,54 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return infoList;
     }
 
-    private List<EmailDetail> buildEmailDetails() {
+    private List<EmailDetail> buildEmailDetails(LiteRegistryBrokerRQ middleware) {
         List<EmailDetail> infoList = new ArrayList<>();
         infoList.add(EmailDetail.builder()
-                .emailID("labo")
-                .emailType("in officia anim D")
-                .preferred("sit")
-                .rowStatus("ull")
+                .emailID(middleware.getPersonalInfo().getEmail())
+                .emailType(mapProperties.get("Value.PhoneEmailInfo.EMAIL"))
+                .preferred(mapProperties.get("PreferredEmailYes"))
+                .rowStatus(mapProperties.get("Operation.PhoneEmailInfo.EMAIL"))
                 .build());
         return infoList;
     }
 
-    private List<PhoneDetail> buildPhoneDetails() {
+    private List<PhoneDetail> buildPhoneDetails(LiteRegistryBrokerRQ middleware) {
         List<PhoneDetail> phoneDetails = new ArrayList<>();
-        phoneDetails.add(PhoneDetail.builder().countryCode("occaecat eiusmod v")
-                .phoneType("Excepteur tempor").phoneNumber("culpa")
-                .preferred("pariatur aute si").rowStatus("fu").build()
+        phoneDetails.add(PhoneDetail.builder()
+                .countryCode(mapProperties.get("PhoneNumCountryCode"))
+                .phoneType(mapProperties.get("PhoneOrEmail.PhoneEmailInfo.PHONE"))
+                .phoneNumber(middleware.getDeviceInfo().getPhoneNumber())
+                .preferred(mapProperties.get("PreferredPhoneYes"))
+                .rowStatus(mapProperties.get("Operation.PhoneEmailInfo.PHONE"))
+                .build()
         );
         return phoneDetails;
     }
 
-    private List<Address> buildAddresses() {
+    private List<Address> buildAddresses(LiteRegistryBrokerRQ middleware) {
         List<Address> addresses = new ArrayList<>();
-        addresses.add(Address.builder().addressType("laboris quis").
-                residingSince("1959-11-07T07:08:51.879Z")
-                .preferred("officias consect")
-                .postalCode("do consectetur")
-                .city("laborum nisi")
-                .state("adipisicing cup")
-                .country("occa")
-                .addressFormat("FREE_TEXT")
-                .addressLabel("mollit cillum")
-                .line1("deserunt ipsum voluptate adipisicing")
-                .line2("fugiat exercitation Duis sit aliquip")
-                .line3("sit est")
-                .houseNumber("Duis fugi")
-                .buildingLevel("labore d")
-                .premiseName("ullamco sed i")
-                .streetNumber("ea Lorem")
+        addresses.add(Address.builder()
+                .addressType("")
+                .residingSince("")
+                .preferred(mapProperties.get("PreferredAddressYes"))
+                .postalCode(mapProperties.get("PostalCode"))
+                .city(getCityAddress(middleware))
+                .state(getStateAddress(middleware))
+                .country(mapProperties.get("Country"))
+                .addressFormat(mapProperties.get("AddrFormat"))
+                .addressLabel(getAddressLabel(middleware))
+                .line1("")
+                .line2("")
+                .line3("")
+                .houseNumber("")
+                .buildingLevel("")
+                .premiseName("")
+                .streetNumber("")
                 .streetName("")
-                .locality("aute non")
-                .suburb("deser")
-                .town("ullamco id aliqua")
-                .rowStatus("sit est ")
+                .locality("")
+                .suburb("")
+                .town("")
+                .rowStatus(mapProperties.get("Operation.AddrType"))
                 .build());
         return addresses;
     }
@@ -287,24 +307,25 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         return alternateLanguages;
     }
 
-    private List<IdentificationDocument> buildIdentificationDocuments() {
+    private List<IdentificationDocument> buildIdentificationDocuments(LiteRegistryBrokerRQ middleware) {
         List<IdentificationDocument> identificationDocuments = new ArrayList<>();
         identificationDocuments.add(
                 IdentificationDocument.builder()
-                        .documentType("ad culpa do")
-                        .documentNumber("aliquip")
-                        .issuingAuthority("minim officia in Duis")
-                        .countryOfIssue("com")
-                        .placeOfIssue("Ut magna")
-                        .issueDate("1950-09-29T12:34:12.153Z")
-                        .expiryDate("1999-03-19T14:42:28.428Z")
-                        .identificationType("ip")
-                        .id("cillum")
-                        .rowStatus("aliqu")
+                        .documentType(getDocumentType(middleware))
+                        .documentNumber(getDocumentNumber(middleware))
+                        .issuingAuthority("")
+                        .countryOfIssue("")
+                        .placeOfIssue("")
+                        .issueDate("")
+                        .expiryDate("")
+                        .identificationType(mapProperties.get("Value.IdentificationType"))
+                        .id("")
+                        .rowStatus(mapProperties.get("Operation.IdentificationType"))
                         .build()
         );
         return identificationDocuments;
     }
+
 
     private List<EmploymentDetail> buildEmploymentDetails() {
         List<EmploymentDetail> employmentDetails = new ArrayList<>();
