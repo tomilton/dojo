@@ -98,8 +98,9 @@ public class Handler {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
                     CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
                     mdw.getRequestHeaderOut().getBody().setAny(customerDetailReq);
-                    return getCustomerDetailUseCase.getCustomerDetail(mdw);
+                    return mdw;
                 })
+                .flatMap(getCustomerDetailUseCase::getCustomerDetail)
                 .map(responseMdw -> {
                     ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
                     return mdw;
