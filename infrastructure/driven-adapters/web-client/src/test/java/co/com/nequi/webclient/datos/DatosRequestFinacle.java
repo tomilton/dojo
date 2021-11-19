@@ -175,36 +175,36 @@ public class DatosRequestFinacle {
     }
 
     public static CustomerRequestFinacle buildRequestFinacle(Customer customer) {
-        return CustomerRequestFinacle.builder()
-                .relationshipmanagerInfo(buildRelationshipmanagerInfo())
-                .emailDetails(buildEmailDetails())
-                .phoneDetails(buildPhoneDetails())
-                .addresses(buildAddresses())
-                .alternateLanguages(buildAlternateLanguages())
-                .identificationDocuments(buildIdentificationDocuments())
-                .employmentDetails(buildEmploymentDetails())
-                .retailIncome(buildRetailIncome())
-                .retailExpense(buildRetailExpense())
-                .bankStaffs(buildBankStaffs())
-                .currencyDetails(buildCurrencyDetails())
-                .cifID("occaecat in pro")
-                .custType("non ")
-                .shortName("sit in")
-                .seniorCitizen("lab")
-                .taxIDType("ut non aute nostrud")
-                .taxIdentificationNumber("et aute eiusmod proident")
-                .taxExemptionCode("dolore adipisicing laboru")
-                .taxResident("enim eiusmod mollit ")
-                .firstname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName1())
-                .middlename(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName2())
-                .lastname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getLastName1())
-                .motherMaidenName("magna quis dolore")
-                .gender("culpa qui")
-                .retailSegment("tempor ut sunt es")
-                .maritalStatus("velit magn")
-                .countryofPrimaryCitizenship("in")
-                .cifStatus("ipsum magna v")
-                .build();
+        CustomerRequestFinacle requestFinacle = new CustomerRequestFinacle();
+        requestFinacle.setRelationshipmanagerInfo(buildRelationshipmanagerInfo());
+        requestFinacle.setEmailDetails(buildEmailDetails());
+        requestFinacle.setPhoneDetails(buildPhoneDetails());
+        requestFinacle.setAddresses(buildAddresses());
+        requestFinacle.setAlternateLanguages(buildAlternateLanguages());
+        requestFinacle.setIdentificationDocuments(buildIdentificationDocuments());
+        requestFinacle.setEmploymentDetails(buildEmploymentDetails());
+        requestFinacle.setRetailIncome(buildRetailIncome());
+        requestFinacle.setRetailExpense(buildRetailExpense());
+        requestFinacle.setBankStaffs(buildBankStaffs());
+        requestFinacle.setCurrencyDetails(buildCurrencyDetails());
+        requestFinacle.setCifID("occaecat in pro");
+        requestFinacle.setCustType("non ");
+        requestFinacle.setShortName("sit in");
+        requestFinacle.setSeniorCitizen("lab");
+        requestFinacle.setTaxIDType("ut non aute nostrud");
+        requestFinacle.setTaxIdentificationNumber("et aute eiusmod proident");
+        requestFinacle.setTaxExemptionCode("dolore adipisicing laboru");
+        requestFinacle.setTaxResident("enim eiusmod mollit ");
+        requestFinacle.setFirstname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName1());
+        requestFinacle.setMiddlename(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getName2());
+        requestFinacle.setLastname(customer.getLiteRegistryBrokerRQ().getPersonalInfo().getLastName1());
+        requestFinacle.setMotherMaidenName("magna quis dolore");
+        requestFinacle.setGender("culpa qui");
+        requestFinacle.setRetailSegment("tempor ut sunt es");
+        requestFinacle.setMaritalStatus("velit magn");
+        requestFinacle.setCountryofPrimaryCitizenship("in");
+        requestFinacle.setCifStatus("ipsum magna v");
+        return requestFinacle;
     }
 
 

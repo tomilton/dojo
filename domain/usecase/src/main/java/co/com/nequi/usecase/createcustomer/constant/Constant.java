@@ -21,4 +21,7 @@ public class Constant {
 
     public static final String COMMON_FORMAT_DATE_FROM_FRONT = "yyyy-MM-dd HH:mm:ss";
 
+    public static final String ROW_STATUS_ADDED = "added";
+    public static final String DELFLG = "N";
+
 }

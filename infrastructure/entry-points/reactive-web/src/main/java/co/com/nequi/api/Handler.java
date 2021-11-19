@@ -1,10 +1,7 @@
 package co.com.nequi.api;
 
-import co.com.nequi.api.models.createcustomer.CustomerJsonMdwRs;
-import co.com.nequi.api.models.createcustomer.LiteRegistryBrokerRS;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
-import co.com.nequi.model.customer.Customer;
 import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
@@ -24,7 +21,6 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 
-import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @Component
@@ -60,29 +56,6 @@ public class Handler {
         Mono<Template> requestMdwMono = request.bodyToMono(Template.class);
         return requestMdwMono
                 .flatMap(useCase::saveTemplate)
-                .flatMap(sr -> ServerResponse
-                        .ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(fromValue(sr))
-                );
-    }
-
-    public Mono<ServerResponse> createCustomer(ServerRequest request) {
-        Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
-        return requestMdwMono
-                .map(requestMdw -> {
-                    RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-                    Customer customer = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), Customer.class);
-                    mdw.getRequestHeaderOut().getBody().setAny(customer);
-                    return mdw;
-                })
-                .flatMap(createCustomerUseCase::createCustomer)
-                .map(responseMdw -> {
-                    ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
-                    CustomerJsonMdwRs brokerRS = mapper.map(mdw.getResponseHeaderOut().getBody().getAny(), CustomerJsonMdwRs.class);
-                    mdw.getResponseHeaderOut().getBody().setAny(brokerRS);
-                    return mdw;
-                })
                 .flatMap(sr -> ServerResponse
                         .ok()
                         .contentType(MediaType.APPLICATION_JSON)

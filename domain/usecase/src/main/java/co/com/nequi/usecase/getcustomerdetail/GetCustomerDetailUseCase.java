@@ -2,7 +2,6 @@ package co.com.nequi.usecase.getcustomerdetail;
 
 import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
-import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsefinacle.detailprueba.*;
 import co.com.nequi.model.responsemdw.*;
@@ -18,8 +17,6 @@ public class GetCustomerDetailUseCase {
 
     private final CustomerServiceFinacle customerServiceFinacle;
 
-    private final LoggerCustomer loggerCustomer;
-
     public Mono<ResponseMdw> getCustomerDetail(RequestMdw requestMdw){
 
         CustomerDetailReq customerDetailReq = (CustomerDetailReq) requestMdw.getRequestHeaderOut().getBody().getAny();
@@ -29,7 +26,7 @@ public class GetCustomerDetailUseCase {
                 .flatMap(response ->
                         Mono.just(buildResponseSucces(response, requestMdw)))
                 .doOnError(e -> {
-                    loggerCustomer.info("Error");
+                    System.out.println("ERROR");
                 })
                 .onErrorResume(error -> handleErrors(error, requestMdw));
     }

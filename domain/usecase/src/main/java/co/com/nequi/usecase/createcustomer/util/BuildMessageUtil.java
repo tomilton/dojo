@@ -58,38 +58,4 @@ public class BuildMessageUtil {
                 .build();
     }
 
-    public static ResponseMdw buildResponseMdw(Object any) {
-        Destination destination = Destination
-                .builder()
-                .name("CustomerDevice")
-                .namespace("http://co.bancaDigital/nequi/services/SecurityServices/CustomerDevice/v1.0")
-                .operation("createCustomer")
-                .build();
-        ResponseStatus responseStatus = ResponseStatus
-                .builder()
-                .statusCode("0")
-                .statusDesc("SUCCESS")
-                .errorMessage("")
-                .system("")
-                .build();
-        Header headerRS = Header
-                .builder()
-                .systemID("MF-001")
-                .messageID("42111635389666196")
-                .invokerDateTime("2021-10-27 21:54:26")
-                .destination(destination)
-                .responseStatus(responseStatus)
-                .build();
-        ResponseHeaderOut responseHeaderOut = ResponseHeaderOut
-                .builder()
-                .header(headerRS)
-                .body(Body.builder().any(any).build())
-                .build();
-        return ResponseMdw.builder()
-                .responseHeaderOut(responseHeaderOut)
-                .build();
-
-    }
-
-
 }

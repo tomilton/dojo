@@ -2,7 +2,6 @@ package co.com.nequi.webclient.services;
 
 import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
-import co.com.nequi.model.customer.gateways.LoggerCustomer;
 import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.CustomerRequestFinacle;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
@@ -24,7 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Service
-public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, LoggerCustomer {
+public class CustomerServiceFinacleImpl implements CustomerServiceFinacle {
 
     @Autowired
     private WebClient client;
@@ -71,7 +70,6 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle, Logge
                 .map(f -> objectMapper.map(f, CustomerDetailResponse.class));
     }
 
-    @Override
     public void info(String info) {
         Logger logger = LoggerFactory.getLogger(CustomerServiceFinacleImpl.class);
         logger.info(info);

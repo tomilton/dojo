@@ -4,6 +4,8 @@ import co.com.nequi.model.customer.CustomerRS;
 import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
+import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
+import co.com.nequi.model.exceptions.DefaultDataException;
 import co.com.nequi.model.requestmdw.*;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
 import co.com.nequi.model.responsemdw.ResponseMdw;
@@ -51,7 +53,7 @@ class CreateCustomerUseCaseTest {
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
 
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(responseParam -> {
 
@@ -70,7 +72,7 @@ class CreateCustomerUseCaseTest {
         List<CustomerDefaultData> defaultDataList = new ArrayList<>();
         when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
         when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
-        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.createCustomer(requestMdw);
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
         StepVerifier.create(responseMdwMono)
                 .consumeNextWith(responseParam -> {
 
@@ -78,6 +80,42 @@ class CreateCustomerUseCaseTest {
                     assertTrue(responseParam.getResponseHeaderOut().getBody().getAny() instanceof CustomerRS);
                     CustomerRS customerRS = (CustomerRS) responseParam.getResponseHeaderOut().getBody().getAny();
                     assertEquals("NP16000000239824", customerRS.getLiteRegistryBrokerRS().getCifId());
+
+                }).verifyComplete();
+    }
+
+    @Test
+    void createCustomerErrorServiceFinacle() {
+        RequestMdw requestMdw = DatosRequestMdw.buildRequestWithDataInTheBody();
+        List<CustomerDefaultData> defaultDataList = new ArrayList<>();
+        when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.fromIterable(defaultDataList));
+        when(customerServiceFinacle.save(any())).thenReturn(Mono.error(new CreateCustomerFinacleException("Error Finacle")));
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
+        StepVerifier.create(responseMdwMono)
+                .consumeNextWith(response -> {
+
+                    ResponseStatus responseStatus = response.getResponseHeaderOut().getHeader().getResponseStatus();
+                    assertTrue(response instanceof ResponseMdw);
+                    assertEquals("500", responseStatus.getStatusCode());
+                    assertNotNull(responseStatus.getErrorMessage());
+
+                }).verifyComplete();
+    }
+
+    @Test
+    void createCustomerErrorServiceDefaultData() {
+        RequestMdw requestMdw = DatosRequestMdw.buildRequestWithDataInTheBody();
+        CustomerResponseFinacle responseFinacle = DatosResponseFinacle.buildCustomerResponseSuccess();
+        when(defaultDataRepository.getDefaultData(any())).thenReturn(Flux.error(new DefaultDataException("Error DefaultData")));
+        when(customerServiceFinacle.save(any())).thenReturn(Mono.just(responseFinacle));
+        Mono<ResponseMdw> responseMdwMono = createCustomerUseCase.execute(requestMdw);
+        StepVerifier.create(responseMdwMono)
+                .consumeNextWith(response -> {
+
+                    ResponseStatus responseStatus = response.getResponseHeaderOut().getHeader().getResponseStatus();
+                    assertTrue(response instanceof ResponseMdw);
+                    assertEquals("500", responseStatus.getStatusCode());
+                    assertNotNull(responseStatus.getErrorMessage());
 
                 }).verifyComplete();
     }
