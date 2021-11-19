@@ -23,7 +23,7 @@ public class WebClientConfig implements CommandLineRunner {
 
     Logger logger = LoggerFactory.getLogger(WebClientConfig.class);
 
-    @Value("${web.client}")
+    @Value("${web.client2}")
     private String url;
 
     @Bean

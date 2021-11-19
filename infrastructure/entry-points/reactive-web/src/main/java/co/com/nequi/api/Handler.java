@@ -1,11 +1,13 @@
 package co.com.nequi.api;
 
-
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
+import co.com.nequi.api.responsemdw.ResponseJsonMdw;
+import co.com.nequi.model.customer.CustomerDetailReq;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.usecase.createcustomer.CreateCustomerUseCase;
+import co.com.nequi.usecase.getcustomerdetail.GetCustomerDetailUseCase;
 import co.com.nequi.usecase.person.PersonUseCase;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
@@ -27,6 +29,7 @@ public class Handler {
 
     private final PersonUseCase useCase;
     private final CreateCustomerUseCase createCustomerUseCase;
+    private final GetCustomerDetailUseCase getCustomerDetailUseCase;
     private final ObjectMapper mapper;
 
     static final Logger logger = LoggerFactory.getLogger(Handler.class);
@@ -64,15 +67,19 @@ public class Handler {
         Mono<RequestJsonMdw> requestMdwMono = request.bodyToMono(RequestJsonMdw.class);
 
         return requestMdwMono
-                .flatMap(requestMdw -> {
-                    logger.info(requestMdw.getOmitXMLDeclaration());
-
+                .map(requestMdw -> {
                     RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
-
-                    return createCustomerUseCase.execute(mdw);
+                    CustomerDetailReq customerDetailReq = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), CustomerDetailReq.class);
+                    mdw.getRequestHeaderOut().getBody().setAny(customerDetailReq);
+                    return mdw;
+                })
+                .flatMap(getCustomerDetailUseCase::getCustomerDetail)
+                .map(responseMdw -> {
+                    ResponseJsonMdw mdw = mapper.map(responseMdw, ResponseJsonMdw.class);
+                    return mdw;
                 })
                 .flatMap(sr -> ServerResponse
-                        .created(URI.create("/api/customer/createCustomer"))
+                        .created(URI.create("/api/customer/getCustomerDetails"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(fromValue(sr))
                 );
