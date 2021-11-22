@@ -3,6 +3,7 @@ package co.com.nequi.usecase.dataprovider;
 import co.com.nequi.model.account.dto.FreezeAccountRQ;
 import co.com.nequi.model.account.dto.UnFreezeAccountRq;
 import co.com.nequi.model.account.dto.UnFreezeAccountRqCustomData;
+import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.requestmdw.*;
 
 import java.util.ArrayList;
@@ -109,5 +110,18 @@ public class DataProviderRequest {
         requestHeaderOut.setBody(body);
         requestMdw.setRequestHeaderOut(requestHeaderOut);
         return requestMdw;
+    }
+
+    public static List<CustomerDefaultData> buildCustomerDefaultDataList(){
+        List<CustomerDefaultData> customerDefaultDataList = new ArrayList<>();
+        customerDefaultDataList.add(buildCustomerDefaultData());
+        return customerDefaultDataList;
+    }
+
+    public static CustomerDefaultData buildCustomerDefaultData(){
+        CustomerDefaultData customerDefaultData = new CustomerDefaultData();
+        customerDefaultData.setDatoDefectoId(Integer.valueOf(157));
+        customerDefaultData.setNombre("bankId");
+        return customerDefaultData;
     }
 }

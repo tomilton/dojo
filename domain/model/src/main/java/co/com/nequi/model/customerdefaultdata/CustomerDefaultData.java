@@ -1,5 +1,10 @@
 package co.com.nequi.model.customerdefaultdata;
 
+import lombok.*;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CustomerDefaultData {
 
     private Integer datoDefectoId;

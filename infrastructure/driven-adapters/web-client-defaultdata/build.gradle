@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':model')
+    implementation project(':redis')
     implementation 'org.springframework:spring-context'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -9,4 +10,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
 
+}
+
+test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
 }

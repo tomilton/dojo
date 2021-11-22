@@ -5,6 +5,7 @@ import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +17,7 @@ public abstract class ReactiveTemplateAdapterOperations<E, K, V> {
     private final Class<V> dataClass;
     protected ObjectMapper mapper;
     private final Function<V, E> toEntityFn;
+    private K pattern;
 
     @SuppressWarnings("unchecked")
     public ReactiveTemplateAdapterOperations(ReactiveRedisConnectionFactory connectionFactory, ObjectMapper mapper, Function<V, E> toEntityFn) {
@@ -29,33 +31,23 @@ public abstract class ReactiveTemplateAdapterOperations<E, K, V> {
                         .build();
 
         template = new ReactiveRedisTemplate<>(connectionFactory, serializationContext);
-        System.out.println("constructor adaptador redis ok connectionFactory "+connectionFactory.toString());
-        System.out.println("constructor adaptador redis ok a "+mapper.toString());
-        System.out.println("constructor adaptador redis ok b "+dataClass.toString());
+        pattern = (K) "*";
     }
 
     public Mono<E> save(K key, E entity) {
-       Mono.just(entity)
+        return Mono.just(entity)
                 .map(this::toValue)
-                .flatMap(value -> {
-                    System.out.println("almacenando cache k "+key);
-                    System.out.println("almacenando cache value "+value);
-                    return template.opsForValue().set(key, value);
-                }).onErrorMap((e) -> {
-                    System.out.println("error almacenando en cache "+e.getMessage());
-                    return e;
-                }).onErrorResume(throwable -> {
-                   System.out.println("error resume "+throwable);
-                   return Mono.empty();
-               } ).onErrorContinue((throwable, o) -> {
-                   System.out.println("este es el objeto de error "+ o.toString());
-               }).subscribe(response -> System.out.println("response "+response));
-        return Mono.empty();
+                .flatMap(value -> template.opsForValue().set(key, value))
+                .thenReturn(entity);
     }
 
     public Mono<E> save(K key, E entity, long expirationMillis) {
         return save(key, entity)
                 .flatMap(v -> template.expire(key, Duration.ofMillis(expirationMillis)).thenReturn(v));
+    }
+
+    public Flux<E> findAll(){
+        return template.keys(pattern).flatMap(template.opsForValue()::get).map(this::toEntity);
     }
 
     public Mono<E> findById(K key) {
