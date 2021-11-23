@@ -54,7 +54,9 @@ public class ServiceDefaultData implements CustomerDefaultDataRepository {
     }
 
     private Flux<CustomerDefaultData> getDataBase(Map<String,Object> params){
-        return client.build().get().uri("/api/datodefecto/{id}", params)
+        return client.build()
+                .get()
+                .uri("/api/datodefecto/{id}", params)
                 .accept(APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(CustomerDefaultData.class)
