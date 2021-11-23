@@ -25,8 +25,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.lang.reflect.Field;
-
 import static co.com.nequi.nequiservice.util.Constants.SUCCESS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,6 +66,7 @@ public class AccountServiceTest {
     @Test
     public void callFinacleFreezeAccountReturnSuccessMockito(){
         accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
+        String bankId = "1600";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -87,7 +86,7 @@ public class AccountServiceTest {
         when(mapper.map(any(),eq(FreezeAccountRsCustomDataMock.class))).thenReturn(freezeAccountRsCustomDataMock);
         accountServiceImpl.mapper = mapper;
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount",bankId)).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -96,13 +95,14 @@ public class AccountServiceTest {
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
                 ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.just(serviceResponse));
-        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ);
+        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ,bankId);
         StepVerifier.create(response).expectNextMatches(responseService -> responseService.getStatus()).verifyComplete();
     }
 
     @Test
     public void callFinacleFreezeAccountReturnFailedMockito(){
         accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
+        String bankId = "1600";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -122,7 +122,7 @@ public class AccountServiceTest {
         when(mapper.map(any(),eq(FreezeAccountRsCustomDataMock.class))).thenReturn(freezeAccountRsCustomDataMock);
         accountServiceImpl.mapper = mapper;
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount",bankId)).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -132,13 +132,14 @@ public class AccountServiceTest {
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
                 ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.just(serviceResponse));
-        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ);
+        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ,bankId);
         StepVerifier.create(response).expectNextMatches(responseService -> !responseService.getStatus()).verifyComplete();
     }
 
     @Test
     public void callFinacleFreezeAccountReturn5xxErrorMockito(){
         accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
+        String bankId = "1600";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
@@ -150,26 +151,27 @@ public class AccountServiceTest {
                                 .build())
                 ).build();
         when(webClientMock.post()).thenReturn(webClient.post());
-        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount",bankId)).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.bodyValue(freezeAccountRQ)).thenReturn(requestHeadersSpecMock);
         when(requestHeadersSpecMock.retrieve()).thenReturn(responseSpecMock);
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
-        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ);
+        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ,bankId);
         StepVerifier.create(response).expectErrorMessage("Error comunicacion finacle").verify();
     }
 
     @Test
     public void callFinacleFreezeAccountReturnExceptionMockito(){
         accountServiceImpl.uriFreezeAccount = "/V1/banks/{bankId}/savings/FreezeAccount";
+        String bankId = "1600";
         FreezeAccountRQ freezeAccountRQ = new FreezeAccountRQ();
         freezeAccountRQ.setAccountNumber("87052427983");
         freezeAccountRQ.setReasonCode("10");
         freezeAccountRQ.setFreezeCode("D");
         when(webClientMock.post()).thenReturn(requestBodyUriSpecMock);
-        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount","1")).thenReturn(requestBodySpecMock);
+        when(requestBodyUriSpecMock.uri("/V1/banks/{bankId}/savings/FreezeAccount",bankId)).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.header(any(),any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
         when(requestBodySpecMock.contentType(Mockito.any())).thenReturn(requestBodySpecMock);
@@ -179,7 +181,7 @@ public class AccountServiceTest {
         when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
         when(responseSpecMock.bodyToMono(
                 ArgumentMatchers.<Class<FinacleResponse>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
-        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ);
+        Mono<FreezeAccountRsService> response = accountServiceImpl.freezeAccount(freezeAccountRQ,bankId);
         StepVerifier.create(response).expectError(AccountOperationException.class).verify();
     }
 

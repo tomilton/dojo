@@ -34,9 +34,9 @@ public class AccountServiceImpl implements AccountService {
     public  ObjectMapper mapper;
 
     @Override
-    public Mono<FreezeAccountRsService> freezeAccount(FreezeAccountRQ freezeAccountRQ) {
+    public Mono<FreezeAccountRsService> freezeAccount(FreezeAccountRQ freezeAccountRQ,String bankId) {
         Mono<FinacleResponse> finacleResponse = webClient.post()
-                .uri(uriFreezeAccount,"1")
+                .uri(uriFreezeAccount,bankId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_XML,MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
             }else{
                 return new FreezeAccountRsService(Boolean.FALSE,freezeAccountRs.getFreezeAccountRs_Customdata().getData().getMessage());
             }
-        });/**.onErrorContinue(Exception.class, (ex, o) -> Mono.just(new FreezeAccountRsService(Boolean.FALSE,"error de mapeo")))*/
+        });
     }
 
     @Override

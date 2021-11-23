@@ -1,0 +1,34 @@
+#spring:
+#  cache:
+#    type: redis
+#  redis:
+#    host: 127.0.0.1
+#<host>    port: 6379
+#  datasource:
+#    initialization-mode: always
+#  application:
+#    name: spring-cloud-redis
+#cloud:
+#  aws:
+#    stack:
+#      name: spring-cache-2
+#cloud:
+#  aws:
+#    elasticache:
+#      clusters:
+#        -
+#          name: customer-cacheReactiveRedisTemplateAdapter
+#          expiration: 100
+#        -
+#          name: default-cache
+#          expiration: 6000
+#    credentials:
+#      access-key:
+#      secret-key:
+#      instance-profile: true
+#         use-default-aws-credentials-chain: true
+
+#    region:
+#      static: us-east-2
+#    stack:
+#      auto: false
