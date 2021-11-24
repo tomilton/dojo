@@ -5,7 +5,7 @@ import java.time.OffsetDateTime;
 
 public class CurrencyDetail {
     private String ccy;
-    private OffsetDateTime prefentialExpiryDate;
+    private String prefentialExpiryDate;
     private String creditDiscountPercentage;
     private String debitDiscountPercentage;
     private String withholdingTaxPercentage;
@@ -18,9 +18,9 @@ public class CurrencyDetail {
     public void setCcy(String value) { this.ccy = value; }
 
     @JsonProperty("prefentialExpiryDate")
-    public OffsetDateTime getPrefentialExpiryDate() { return prefentialExpiryDate; }
+    public String getPrefentialExpiryDate() { return prefentialExpiryDate; }
     @JsonProperty("prefentialExpiryDate")
-    public void setPrefentialExpiryDate(OffsetDateTime value) { this.prefentialExpiryDate = value; }
+    public void setPrefentialExpiryDate(String value) { this.prefentialExpiryDate = value; }
 
     @JsonProperty("creditDiscountPercentage")
     public String getCreditDiscountPercentage() { return creditDiscountPercentage; }

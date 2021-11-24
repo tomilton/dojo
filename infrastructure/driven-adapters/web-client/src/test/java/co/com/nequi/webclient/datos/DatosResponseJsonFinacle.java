@@ -1,14 +1,16 @@
 package co.com.nequi.webclient.datos;
 
-
-import co.com.nequi.model.responsefinacle.customer.*;
+import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
+import co.com.nequi.webclient.json.customer.response.Data;
+import co.com.nequi.webclient.json.customer.response.ErrorDetail;
+import co.com.nequi.webclient.json.customer.response.Meta;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatosResponseFinacle {
+public class DatosResponseJsonFinacle {
 
-    private DatosResponseFinacle() {
+    private DatosResponseJsonFinacle() {
     }
 
     public static Meta buildMeta() {
@@ -40,15 +42,15 @@ public class DatosResponseFinacle {
         return data;
     }
 
-    public static CustomerResponseFinacle buildCustomerResponseSuccesJSON() {
-        CustomerResponseFinacle customerResponseJSON = new CustomerResponseFinacle();
+    public static CustomerResponseJSON buildCustomerResponseSuccesJSON() {
+        CustomerResponseJSON customerResponseJSON = new CustomerResponseJSON();
         customerResponseJSON.setMeta(buildMeta());
         customerResponseJSON.setData(buildData());
         return customerResponseJSON;
     }
 
-    public static CustomerResponseFinacle buildCustomerResponseErrorJSON() {
-        CustomerResponseFinacle customerResponseJSON = new CustomerResponseFinacle();
+    public static CustomerResponseJSON buildCustomerResponseErrorJSON() {
+        CustomerResponseJSON customerResponseJSON = new CustomerResponseJSON();
         customerResponseJSON.setMeta(buildMetaWithErros());
         customerResponseJSON.setData(buildData());
         return customerResponseJSON;

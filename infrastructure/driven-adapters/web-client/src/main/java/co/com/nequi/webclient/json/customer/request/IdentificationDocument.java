@@ -9,8 +9,8 @@ public class IdentificationDocument {
     private String issuingAuthority;
     private String countryOfIssue;
     private String placeOfIssue;
-    private OffsetDateTime issueDate;
-    private OffsetDateTime expiryDate;
+    private String issueDate;
+    private String expiryDate;
     private String identificationType;
     private String id;
     private String rowStatus;
@@ -41,14 +41,14 @@ public class IdentificationDocument {
     public void setPlaceOfIssue(String value) { this.placeOfIssue = value; }
 
     @JsonProperty("issueDate")
-    public OffsetDateTime getIssueDate() { return issueDate; }
+    public String getIssueDate() { return issueDate; }
     @JsonProperty("issueDate")
-    public void setIssueDate(OffsetDateTime value) { this.issueDate = value; }
+    public void setIssueDate(String value) { this.issueDate = value; }
 
     @JsonProperty("expiryDate")
-    public OffsetDateTime getExpiryDate() { return expiryDate; }
+    public String getExpiryDate() { return expiryDate; }
     @JsonProperty("expiryDate")
-    public void setExpiryDate(OffsetDateTime value) { this.expiryDate = value; }
+    public void setExpiryDate(String value) { this.expiryDate = value; }
 
     @JsonProperty("identificationType")
     public String getIdentificationType() { return identificationType; }

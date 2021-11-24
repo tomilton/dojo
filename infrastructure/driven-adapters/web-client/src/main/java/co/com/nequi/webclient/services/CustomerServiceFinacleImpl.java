@@ -29,7 +29,7 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle {
     private WebClient client;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
 
     @Override
     public Mono<CustomerResponseFinacle> save(CustomerRequestFinacle customerRequestFinacle) {
@@ -70,8 +70,4 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle {
                 .map(f -> objectMapper.map(f, CustomerDetailResponse.class));
     }
 
-    public void info(String info) {
-        Logger logger = LoggerFactory.getLogger(CustomerServiceFinacleImpl.class);
-        logger.info(info);
-    }
 }
