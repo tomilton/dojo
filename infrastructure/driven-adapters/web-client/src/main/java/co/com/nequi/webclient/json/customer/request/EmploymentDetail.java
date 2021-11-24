@@ -15,8 +15,8 @@ public class EmploymentDetail {
     private String countryOfDeputation;
     private String occupation;
     private String designation;
-    private OffsetDateTime employmentStartDate;
-    private OffsetDateTime employmentEndDate;
+    private String employmentStartDate;
+    private String employmentEndDate;
     private String rowStatus;
 
     @JsonProperty("id")
@@ -75,14 +75,14 @@ public class EmploymentDetail {
     public void setDesignation(String value) { this.designation = value; }
 
     @JsonProperty("employmentStartDate")
-    public OffsetDateTime getEmploymentStartDate() { return employmentStartDate; }
+    public String getEmploymentStartDate() { return employmentStartDate; }
     @JsonProperty("employmentStartDate")
-    public void setEmploymentStartDate(OffsetDateTime value) { this.employmentStartDate = value; }
+    public void setEmploymentStartDate(String value) { this.employmentStartDate = value; }
 
     @JsonProperty("employmentEndDate")
-    public OffsetDateTime getEmploymentEndDate() { return employmentEndDate; }
+    public String getEmploymentEndDate() { return employmentEndDate; }
     @JsonProperty("employmentEndDate")
-    public void setEmploymentEndDate(OffsetDateTime value) { this.employmentEndDate = value; }
+    public void setEmploymentEndDate(String value) { this.employmentEndDate = value; }
 
     @JsonProperty("__row_status")
     public String getRowStatus() { return rowStatus; }

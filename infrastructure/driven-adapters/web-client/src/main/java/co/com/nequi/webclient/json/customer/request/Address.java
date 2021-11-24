@@ -7,7 +7,7 @@ public class Address {
     private String addressFormat;
     private String addressLabel;
     private String addressType;
-    private OffsetDateTime residingSince;
+    private String residingSince;
     private String preferred;
     private String line1;
     private String line2;
@@ -42,9 +42,9 @@ public class Address {
     public void setAddressType(String value) { this.addressType = value; }
 
     @JsonProperty("residingSince")
-    public OffsetDateTime getResidingSince() { return residingSince; }
+    public String getResidingSince() { return residingSince; }
     @JsonProperty("residingSince")
-    public void setResidingSince(OffsetDateTime value) { this.residingSince = value; }
+    public void setResidingSince(String value) { this.residingSince = value; }
 
     @JsonProperty("preferred")
     public String getPreferred() { return preferred; }
