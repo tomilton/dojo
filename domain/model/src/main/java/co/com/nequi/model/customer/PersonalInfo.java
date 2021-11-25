@@ -8,15 +8,15 @@ public class PersonalInfo {
     private String lastName1;
     private String lastName2;
     private String idNumber;
-    private City secondIDNumber;
-    private City expeditionDate;
+    private String secondIDNumber;
+    private String expeditionDate;
     private String birthDate;
     private String email;
-    private City nickName;
+    private String nickName;
     private String typeID;
-    private City secondTypeID;
+    private String secondTypeID;
     private String address;
-    private City city;
+    private String city;
     private String state;
     private String occupation;
 
@@ -69,21 +69,6 @@ public class PersonalInfo {
         this.idNumber = value;
     }
 
-    public City getSecondIDNumber() {
-        return secondIDNumber;
-    }
-
-    public void setSecondIDNumber(City value) {
-        this.secondIDNumber = value;
-    }
-
-    public City getExpeditionDate() {
-        return expeditionDate;
-    }
-
-    public void setExpeditionDate(City value) {
-        this.expeditionDate = value;
-    }
 
     public String getBirthDate() {
         return birthDate;
@@ -101,13 +86,6 @@ public class PersonalInfo {
         this.email = value;
     }
 
-    public City getNickName() {
-        return nickName;
-    }
-
-    public void setNickName(City value) {
-        this.nickName = value;
-    }
 
     public String getTypeID() {
         return typeID;
@@ -117,12 +95,52 @@ public class PersonalInfo {
         this.typeID = value;
     }
 
-    public City getSecondTypeID() {
+    public String getIdNumber() {
+        return idNumber;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public String getSecondIDNumber() {
+        return secondIDNumber;
+    }
+
+    public void setSecondIDNumber(String secondIDNumber) {
+        this.secondIDNumber = secondIDNumber;
+    }
+
+    public String getExpeditionDate() {
+        return expeditionDate;
+    }
+
+    public void setExpeditionDate(String expeditionDate) {
+        this.expeditionDate = expeditionDate;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getSecondTypeID() {
         return secondTypeID;
     }
 
-    public void setSecondTypeID(City value) {
-        this.secondTypeID = value;
+    public void setSecondTypeID(String secondTypeID) {
+        this.secondTypeID = secondTypeID;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public String getAddress() {
@@ -133,13 +151,6 @@ public class PersonalInfo {
         this.address = value;
     }
 
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City value) {
-        this.city = value;
-    }
 
     public String getState() {
         return state;

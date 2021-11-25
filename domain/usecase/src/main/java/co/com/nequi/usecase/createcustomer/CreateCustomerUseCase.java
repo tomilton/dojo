@@ -213,7 +213,7 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
         requestFinacle.setAddresses(buildAddresses(middleware));
         requestFinacle.setAlternateLanguages(buildAlternateLanguages());
         requestFinacle.setIdentificationDocuments(buildIdentificationDocuments(middleware));
-        requestFinacle.setEmploymentDetails(buildEmploymentDetails());
+        requestFinacle.setEmploymentDetails(buildEmploymentDetails(middleware));
         requestFinacle.setRetailIncome(buildRetailIncome());
         requestFinacle.setRetailExpense(buildRetailExpense());
         requestFinacle.setBankStaffs(buildBankStaffs());
@@ -505,7 +505,7 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
      *
      * @return
      */
-    private List<EmploymentDetail> buildEmploymentDetails() {
+    private List<EmploymentDetail> buildEmploymentDetails(LiteRegistryBrokerRQ middleware) {
         List<EmploymentDetail> employmentDetails = new ArrayList<>();
         employmentDetails.add(
                 EmploymentDetail.builder()
@@ -518,7 +518,7 @@ public class CreateCustomerUseCase extends AbstractUseCase<ResponseMdw, RequestM
                         .city("commodo proident ut")
                         .state("laboris pariatur sit esse")
                         .countryOfDeputation("do")
-                        .occupation("est Excepteur laborum")
+                        .occupation(middleware.getPersonalInfo().getOccupation())
                         .designation("pariatur")
                         .employmentStartDate("2002-12-19T07:25:13.590Z")
                         .employmentEndDate("2018-01-20T09:55:41.224Z")

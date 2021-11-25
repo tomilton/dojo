@@ -24,3 +24,15 @@ finacle:
   uri:
     freezeAccount: "/V1/banks/{bankId}/savings/FreezeAccount"
     unfreezeAccount: "/V1.0/banks/{bankId}/savings/accounts/{account}/freeze"
+
+aws:
+  accessKey: "******"
+  secretKey: "******"
+
+dynamodb:
+  endpoint: http://localhost:4566/
+
+
+web:
+  client: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io
+  client2: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io
