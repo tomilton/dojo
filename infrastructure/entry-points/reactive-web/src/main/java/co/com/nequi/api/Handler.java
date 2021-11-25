@@ -3,11 +3,13 @@ package co.com.nequi.api;
 import co.com.nequi.api.requestmdw.RequestJsonMdw;
 import co.com.nequi.api.responsemdw.ResponseJsonMdw;
 import co.com.nequi.model.customer.CustomerDetailReq;
+import co.com.nequi.model.customer.GetLockRQ;
 import co.com.nequi.model.person.Person;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.usecase.createcustomer.CreateCustomerUseCase;
 import co.com.nequi.usecase.getcustomerdetail.GetCustomerDetailUseCase;
+import co.com.nequi.usecase.getlockcustomer.GetLockCustomerUseCase;
 import co.com.nequi.usecase.person.PersonUseCase;
 import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
@@ -31,6 +33,7 @@ public class Handler {
     private final CreateCustomerUseCase createCustomerUseCase;
     private final GetCustomerDetailUseCase getCustomerDetailUseCase;
     private final ObjectMapper mapper;
+    private final GetLockCustomerUseCase getLockCustomerUseCase;
 
     static final Logger logger = LoggerFactory.getLogger(Handler.class);
 
@@ -43,7 +46,22 @@ public class Handler {
         String id = serverRequest.pathVariable("id");
         return ServerResponse.ok().body(useCase.getTemplateById(id), Template.class);
     }
-
+    public Mono<ServerResponse> getLockCustomer(ServerRequest serverRequest) {
+        Mono<RequestJsonMdw> requestMdwMono = serverRequest.bodyToMono(RequestJsonMdw.class);
+        return requestMdwMono
+                .map(requestMdw -> {
+                    RequestMdw mdw = mapper.map(requestMdw, RequestMdw.class);
+                    GetLockRQ lockRQ = mapper.map(mdw.getRequestHeaderOut().getBody().getAny(), GetLockRQ.class);
+                    mdw.getRequestHeaderOut().getBody().setAny(lockRQ);
+                    return mdw;
+                })
+                .flatMap(getLockCustomerUseCase::getLockCustomer)
+                .flatMap(sr -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(fromValue(sr))
+                );
+    }
     public Mono<ServerResponse> getAllTemplates(ServerRequest serverRequest) {
         return ServerResponse
                 .ok()

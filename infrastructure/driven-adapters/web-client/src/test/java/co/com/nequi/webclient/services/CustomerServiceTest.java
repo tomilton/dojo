@@ -2,10 +2,14 @@ package co.com.nequi.webclient.services;
 
 import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
+import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle2;
 import co.com.nequi.webclient.datos.DatosRequestFinacle;
 import co.com.nequi.webclient.datos.DatosRequestMiddleware;
 import co.com.nequi.webclient.datos.DatosResponseFinacle;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
+import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON2;
+import co.com.nequi.webclient.services.datos.Request;
+import co.com.nequi.webclient.services.datos.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +17,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,6 +27,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
@@ -34,15 +40,20 @@ class CustomerServiceTest {
     private WebClient webClientMock;
     @Mock
     private WebClient.RequestBodyUriSpec requestBodyUriSpecMock;
+
     @Mock
     private WebClient.RequestBodySpec requestBodySpecMock;
     @Mock
     private WebClient.ResponseSpec responseSpecMock;
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersMock;
+    @Mock
+    private WebClient.RequestHeadersUriSpec requestHeadersUriSpec;
 
     @InjectMocks
     private CustomerServiceFinacleImpl customerServiceFinacle;
+
+
 
     @Test
     @DisplayName("Respuesta sin errores de finacle")
@@ -113,5 +124,41 @@ class CustomerServiceTest {
         StepVerifier.create(response).expectError(CreateCustomerFinacleException.class).verify();
     }
 
+    @Test
+    @DisplayName("Respuesta sin errores del get de finacle")
+    void callFinacleGetCustomerSuccesMockito() {
+        String bankId = "1";
+        String accounId = "0100194521";
+        when(webClientMock.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri("/V1.0/banks/{bankId}/savings/accounts/{accountId}", bankId, accounId)).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON2>>notNull())).thenReturn(Mono.just(Request.buildsucessResponse()));
+        ObjectMapper maperMock = mock(ObjectMapper.class);
+        when(maperMock.map(any(), Response.buildsucessFinacleJSON().getClass()));
+        Mono<CustomerResponseFinacle2> response = customerServiceFinacle.getLock(bankId, accounId);
 
+        StepVerifier.create(response).expectNextMatches(responseService -> {
+         return responseService.getData().getSavingAccountInquiryRs().getCustomerId().equals("id");
+        }).verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Respuesta errores del get de finacle")
+    void callFinacleGetCustomerErrorMockito() {
+        String bankId = "1";
+        String accounId = "0100194521";
+        when(webClientMock.get()).thenReturn(requestHeadersUriSpec);
+        when(requestHeadersUriSpec.uri("/V1.0/banks/{bankId}/savings/accounts/{accountId}", bankId, accounId)).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.header(any(), any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.accept(Mockito.any())).thenReturn(requestBodySpecMock);
+        when(requestBodySpecMock.retrieve()).thenReturn(responseSpecMock);
+        when(responseSpecMock.onStatus(any(), any())).thenReturn(responseSpecMock);
+        when(responseSpecMock.bodyToMono(ArgumentMatchers.<Class<CustomerResponseJSON2>>notNull())).thenReturn(Mono.error(new Exception("error call finacle")));
+        Mono<CustomerResponseFinacle2> response = customerServiceFinacle.getLock(bankId, accounId);
+        StepVerifier.create(response).expectError(CreateCustomerFinacleException.class).verify();
+
+    }
 }

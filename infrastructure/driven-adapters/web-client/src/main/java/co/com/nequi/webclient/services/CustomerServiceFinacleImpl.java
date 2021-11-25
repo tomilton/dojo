@@ -5,12 +5,14 @@ import co.com.nequi.model.customer.gateways.CustomerServiceFinacle;
 import co.com.nequi.model.exceptions.CreateCustomerFinacleException;
 import co.com.nequi.model.requestfinacle.customer.CustomerRequestFinacle;
 import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle;
+import co.com.nequi.model.responsefinacle.customer.CustomerResponseFinacle2;
 import co.com.nequi.model.responsefinacle.detailprueba.CustomerDetailResponse;
 import co.com.nequi.webclient.json.customer.request.CustomerDetailRequestJSON;
 import co.com.nequi.webclient.json.customer.request.CustomerRequestJSON;
 import co.com.nequi.webclient.json.customer.request.GetCustomerDetails;
 import co.com.nequi.webclient.json.customer.response.CustomerDetailResponseJSON;
 import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON;
+import co.com.nequi.webclient.json.customer.response.CustomerResponseJSON2;
 import org.reactivecommons.utils.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,18 @@ public class CustomerServiceFinacleImpl implements CustomerServiceFinacle {
                 .onErrorMap(throwable -> new CreateCustomerFinacleException(throwable.getMessage()));
         return finacleResponse.map(obj -> objectMapper.map(obj, CustomerResponseFinacle.class));
     }
-
+    @Override
+    public Mono<CustomerResponseFinacle2> getLock(String bankId, String accounId) {
+   Mono<CustomerResponseJSON2> finacleResponse = client.get()
+             .uri("/V1.0/banks/{bankId}/savings/accounts/{accountId}", bankId, accounId)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatus::is5xxServerError, resp -> Mono.error(new CreateCustomerFinacleException("Error comunicación finacle")))
+                .bodyToMono(CustomerResponseJSON2.class)
+                .onErrorMap(throwable -> new CreateCustomerFinacleException(throwable.getMessage()));
+   return  finacleResponse.map(response -> objectMapper.map(response, CustomerResponseFinacle2.class));
+    }
     @Override
     public Mono<CustomerDetailResponse> getCustomerDetail(CustomerDetailReq customerDetail) {
         CustomerDetailRequestJSON requestJSON = new CustomerDetailRequestJSON();

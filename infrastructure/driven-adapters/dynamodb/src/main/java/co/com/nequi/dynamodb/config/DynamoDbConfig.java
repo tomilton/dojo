@@ -1,5 +1,6 @@
 package co.com.nequi.dynamodb.config;
 
+import co.com.nequi.dynamodb.entity.LockRSEntity;
 import co.com.nequi.dynamodb.entity.TemplateEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -53,7 +54,10 @@ public class DynamoDbConfig implements CommandLineRunner {
     public DynamoDbAsyncTable<TemplateEntity> getDynamoDbAsyncTemplate(DynamoDbEnhancedAsyncClient asyncClient) {
         return asyncClient.table(TemplateEntity.class.getSimpleName(), TableSchema.fromBean(TemplateEntity.class));
     }
-
+    @Bean
+    public DynamoDbAsyncTable<LockRSEntity> getDynamoDbAsyncLock(DynamoDbEnhancedAsyncClient asyncClient) {
+        return asyncClient.table(LockRSEntity.class.getSimpleName(), TableSchema.fromBean(LockRSEntity.class));
+    }
     @Override
     public void run(String... args) {
         CompletableFuture<List<String>> listCompletableFuture = getDynamoDbAsyncClient().listTables().thenApply(ListTablesResponse::tableNames);

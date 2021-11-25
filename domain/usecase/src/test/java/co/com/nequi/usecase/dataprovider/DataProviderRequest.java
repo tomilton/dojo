@@ -1,8 +1,10 @@
 package co.com.nequi.usecase.dataprovider;
 
 import co.com.nequi.model.account.dto.FreezeAccountRQ;
+import co.com.nequi.model.account.dto.LockAccount;
 import co.com.nequi.model.account.dto.UnFreezeAccountRq;
 import co.com.nequi.model.account.dto.UnFreezeAccountRqCustomData;
+import co.com.nequi.model.customer.LockRQ;
 import co.com.nequi.model.requestmdw.*;
 
 import java.util.ArrayList;
@@ -105,6 +107,53 @@ public class DataProviderRequest {
         UnFreezeAccountRqCustomData unFreezeAccountRqCustomData = new UnFreezeAccountRqCustomData();
         unFreezeAccountRqCustomData.setFreezeReasonCode("D");
         unfreezeAccountRQ.setAccountUnFreezeRq_Customdata(unFreezeAccountRqCustomData);
+        body.setAny(unfreezeAccountRQ);
+        requestHeaderOut.setBody(body);
+        requestMdw.setRequestHeaderOut(requestHeaderOut);
+        return requestMdw;
+    }
+
+    public static RequestMdw buildRequestLockCustomerTest(){
+        RequestMdw requestMdw = new RequestMdw();
+        RequestHeaderOut requestHeaderOut = new RequestHeaderOut();
+        SecurityCredential securityCredential = new SecurityCredential();
+        securityCredential.setUserName("BROKER");
+        securityCredential.setUserToken("TOKEN");
+        Header header = new Header();
+        header.setSystemID("MF-001");
+        header.setMessageID("58801636062024223");
+        header.setInvokerDateTime("2021-11-04 16:40:24");
+        header.setSecurityCredential(securityCredential);
+        Destination destination = new Destination();
+        destination.setName("LockAccount");
+        destination.setNamespace("http://co.bancaDigital/nequi/services/UserServices/LockAccount/v1.0");
+        destination.setOperation("getLock");
+        header.setDestination(destination);
+        MessageContext messageContext = new MessageContext();
+        Property property = new Property();
+        List<Item> items = new ArrayList<>();
+        Item item1 = new Item();
+        item1.setKey("RQ");
+        item1.setValue("getLockRQ");
+        items.add(item1);
+        Item item2 = new Item();
+        item2.setKey("RS");
+        item2.setValue("getLockRS");
+        items.add(item2);
+        Item item3 = new Item();
+        item3.setKey("Region");
+        item3.setValue("P001");
+        items.add(item3);
+        Item item4 = new Item();
+        item4.setKey("appType");
+        item4.setValue("Nequi");
+        items.add(item4);
+        property.setItem(items);
+        messageContext.setProperty(property);
+        header.setMessageContext(messageContext);
+        requestHeaderOut.setHeader(header);
+        Body body = new Body();
+        LockAccount unfreezeAccountRQ = new LockAccount("1225");
         body.setAny(unfreezeAccountRQ);
         requestHeaderOut.setBody(body);
         requestMdw.setRequestHeaderOut(requestHeaderOut);
