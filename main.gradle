@@ -39,6 +39,16 @@ subprojects {
         }
     }
 
+    test {
+        useJUnitPlatform {
+            includeEngines 'junit-jupiter'
+        }
+        filter {
+            //include all integration tests
+            includeTestsMatching "*Test"
+        }
+    }
+
 }
 
 jacoco {

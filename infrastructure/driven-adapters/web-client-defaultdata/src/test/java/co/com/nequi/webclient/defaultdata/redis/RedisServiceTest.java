@@ -59,7 +59,7 @@ public class RedisServiceTest {
     public void getCustomerDefaultDataIdReturnOk(){
         Integer defaultDataBankId = Integer.valueOf("157");
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(redisTemplateAdapter.findById("157")).thenReturn(Mono.just(DataProvider.customerDefaultDataBank()));
+        when(redisTemplateAdapter.findById(defaultDataBankId)).thenReturn(Mono.just(DataProvider.customerDefaultDataBank()));
         Mono<CustomerDefaultData> response = this.redisService.getCustomerDefaultDataId(defaultDataBankId);
         StepVerifier.create(response)
                 .consumeNextWith(responseParam -> {
@@ -95,11 +95,11 @@ public class RedisServiceTest {
         List<CustomerDefaultData> customerDefaultDataList = new ArrayList<>();
         customerDefaultDataList.add(DataProvider.customerDefaultDataBank());
         customerDefaultDataList.add(DataProvider.customerDefaultDataCustStatus());
-        when(redisTemplateAdapter.save(eq(customerDefaultDataList.get(0).getDatoDefectoId().toString()),any())).thenReturn(Mono.just(DataProvider.customerDefaultDataBank()));
-        when(redisTemplateAdapter.save(eq(customerDefaultDataList.get(1).getDatoDefectoId().toString()),any())).thenReturn(Mono.just(DataProvider.customerDefaultDataCustStatus()));
+        when(redisTemplateAdapter.save(eq(customerDefaultDataList.get(0).getDatoDefectoId()),any())).thenReturn(Mono.just(DataProvider.customerDefaultDataBank()));
+        when(redisTemplateAdapter.save(eq(customerDefaultDataList.get(1).getDatoDefectoId()),any())).thenReturn(Mono.just(DataProvider.customerDefaultDataCustStatus()));
         this.redisService.saveDefaultProperties(customerDefaultDataList);
-        verify(redisTemplateAdapter, times(1)).save(eq(customerDefaultDataList.get(0).getDatoDefectoId().toString()),any());
-        verify(redisTemplateAdapter, times(1)).save(eq(customerDefaultDataList.get(1).getDatoDefectoId().toString()),any());
+        verify(redisTemplateAdapter, times(1)).save(eq(customerDefaultDataList.get(0).getDatoDefectoId()),any());
+        verify(redisTemplateAdapter, times(1)).save(eq(customerDefaultDataList.get(1).getDatoDefectoId()),any());
     }
 
 }

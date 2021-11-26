@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Component
-public class ReactiveRedisTemplateAdapter extends ReactiveTemplateAdapterOperations<CustomerDefaultData/* change for domain model */, String, CustomerDefaultData/* change for domain model */>
+public class ReactiveRedisTemplateAdapter extends ReactiveTemplateAdapterOperations<CustomerDefaultData/* change for domain model */, Integer, CustomerDefaultData/* change for domain model */>
 // implements ModelRepository from domain
 {
     public ReactiveRedisTemplateAdapter(ReactiveRedisConnectionFactory connectionFactory, ObjectMapper mapper) {

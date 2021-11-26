@@ -17,7 +17,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public Mono<CustomerDefaultData> getCustomerDefaultDataId(Integer defaultDataId) {
-        return redisTemplate.findById(defaultDataId.toString());
+        return redisTemplate.findById(defaultDataId);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public void saveDefaultProperties(List<CustomerDefaultData> customerDefaultDataList) {
         for (CustomerDefaultData customerDefaultData : customerDefaultDataList) {
-            redisTemplate.save(customerDefaultData.getDatoDefectoId().toString(),customerDefaultData).subscribe();
+            redisTemplate.save(customerDefaultData.getDatoDefectoId(),customerDefaultData).subscribe();
         }
     }
 }
