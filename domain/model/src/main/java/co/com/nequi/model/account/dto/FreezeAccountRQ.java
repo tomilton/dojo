@@ -11,4 +11,5 @@ public class FreezeAccountRQ {
     private String accountNumber;
     private String reasonCode;
     private String freezeCode;
+    private String bankId;
 }

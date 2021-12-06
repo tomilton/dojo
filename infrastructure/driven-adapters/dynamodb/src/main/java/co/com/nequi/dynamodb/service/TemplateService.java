@@ -4,6 +4,7 @@ import co.com.nequi.dynamodb.mapper.Mapper;
 import co.com.nequi.model.template.Template;
 import co.com.nequi.dynamodb.repository.TemplateDynamoDBRepository;
 import co.com.nequi.model.template.gateways.TemplateRepository;
+import org.reactivecommons.utils.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,11 @@ public class TemplateService implements TemplateRepository {
 
     private final TemplateDynamoDBRepository templateRepository;
 
-    public TemplateService(TemplateDynamoDBRepository templateRepository) {
+    private final ObjectMapper mapper;
+
+    public TemplateService(TemplateDynamoDBRepository templateRepository, ObjectMapper mapper) {
         this.templateRepository = templateRepository;
+        this.mapper = mapper;
     }
 
     @Override

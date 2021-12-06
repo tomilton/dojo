@@ -7,26 +7,31 @@ import co.com.nequi.dynamodb.repository.TemplateDynamoDBRepository;
 import co.com.nequi.model.template.Template;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
 
+import org.reactivecommons.utils.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class TemplateServiceTest {
 
     private TemplateService templateService;
     private TemplateDynamoDBRepository templateRepository;
+    @Mock
+    ObjectMapper mapper;
 
     @BeforeEach
     void setUp() {
         this.templateRepository = Mockito.mock(TemplateDynamoDBRepository.class);
-        this.templateService = new TemplateService(templateRepository);
+        this.templateService = new TemplateService(templateRepository, mapper);
     }
 
     @Test

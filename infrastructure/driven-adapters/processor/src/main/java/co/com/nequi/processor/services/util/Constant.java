@@ -1,4 +1,4 @@
-package co.com.nequi.usecase.createcustomer.constant;
+package co.com.nequi.processor.services.util;
 
 public class Constant {
 

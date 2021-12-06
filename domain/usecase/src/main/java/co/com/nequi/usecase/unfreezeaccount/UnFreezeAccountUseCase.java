@@ -24,8 +24,9 @@ public class UnFreezeAccountUseCase {
                     unFreezeAccountRq.setBankId(defaultData.getValorDefecto());
                     return this.accountService.unFreezeAccount(unFreezeAccountRq);
                 })
-                .onErrorResume((e) ->  Mono.just(new UnFreezeAccountRsService(e.getMessage())) )
+                //.onErrorResume((e) ->  Mono.just(new UnFreezeAccountRsService(e.getMessage())) )
                 .map((res)-> Mono.just(new UnFreezeAccountBrokerRS(res.getMessage())) )
-                .map((responseService) -> ResponseUtil.buildResponseSuccess(responseService.block(),requestMdw));
+                .map((responseService) -> ResponseUtil.buildResponseSuccess(responseService.block(),requestMdw))
+                .onErrorResume(error -> ResponseUtil.handleErrors(error, requestMdw));
     }
 }

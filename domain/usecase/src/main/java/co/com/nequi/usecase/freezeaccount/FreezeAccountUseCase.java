@@ -6,13 +6,10 @@ import co.com.nequi.model.account.dto.FreezeAccountRsService;
 import co.com.nequi.model.account.gateways.AccountService;
 import co.com.nequi.model.customerdefaultdata.CustomerDefaultData;
 import co.com.nequi.model.customerdefaultdata.gateways.CustomerDefaultDataRepository;
-import co.com.nequi.model.oracle.DefaultCache;
-import co.com.nequi.model.oracle.RedisService;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.*;
 import co.com.nequi.usecase.util.ResponseUtil;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor

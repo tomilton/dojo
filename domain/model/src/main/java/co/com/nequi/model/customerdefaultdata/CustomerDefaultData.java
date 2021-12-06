@@ -2,10 +2,12 @@ package co.com.nequi.model.customerdefaultdata;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerDefaultData {
+public class CustomerDefaultData implements Serializable {
 
     private Integer datoDefectoId;
     private String nombre;

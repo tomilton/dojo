@@ -15,11 +15,14 @@ public class Template {
     private String protocol;
     private String host;
     private String port;
+    private String path;
     private String region;
     private String version;
 
     private List<PropertyRS> propertyRS;
     private List<PropertyRQ> propertyRQ;
+
+    private List<DefaultDataKeyProperty> defaultDataKeys;
 
 
     public String getTemplateID() {
@@ -126,6 +129,22 @@ public class Template {
         this.propertyRQ = propertyRQ;
     }
 
+    public List<DefaultDataKeyProperty> getDefaultDataKeys() {
+        return defaultDataKeys;
+    }
+
+    public void setDefaultDataKeys(List<DefaultDataKeyProperty> defaultDataKeys) {
+        this.defaultDataKeys = defaultDataKeys;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     @Override
     public String toString() {
         return "Template{" +
@@ -138,10 +157,12 @@ public class Template {
                 ", protocol='" + protocol + '\'' +
                 ", host='" + host + '\'' +
                 ", port='" + port + '\'' +
+                ", path=" + path +
                 ", region='" + region + '\'' +
                 ", version='" + version + '\'' +
                 ", propertyRS=" + propertyRS +
                 ", propertyRQ=" + propertyRQ +
+                ", defaultDataKeys=" + defaultDataKeys +
                 '}';
     }
 }

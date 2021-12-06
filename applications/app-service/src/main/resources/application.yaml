@@ -11,28 +11,32 @@ spring:
       path: "/h2"
   profiles:
     include: null
-  datasource:
-    url: "jdbc:h2:mem:test"
-    username: "sa"
-    password: "pass"
-    driverClassName: "org.h2.Driver"
-  jpa:
-    databasePlatform: "org.hibernate.dialect.H2Dialect"
+  cache:
+    type: redis
+  #  datasource:
+  #    url: "jdbc:h2:mem:test"
+  #    username: "sa"
+  #    password: "pass"
+  #    driverClassName: "org.h2.Driver"
+  #  jpa:
+  #    databasePlatform: "org.hibernate.dialect.H2Dialect"
+  redis:
+    host: "localhost"
+    port: 6379
+
 traceconfig:
   type: "logback"
 finacle:
   uri:
     freezeAccount: "/V1/banks/{bankId}/savings/FreezeAccount"
     unfreezeAccount: "/V1.0/banks/{bankId}/savings/accounts/{account}/freeze"
-
+    #unfreezeAccount: "/V1.0/banks/1600/savings/accounts/0100232484/freezenofound"
+web:
+  client: "https://14829b62-d02f-4cf5-b2a8-3c0b3b8f7884.mock.pstmn.io"
+  client2: "https://14829b62-d02f-4cf5-b2a8-3c0b3b8f7884.mock.pstmn.io"
 aws:
   accessKey: "******"
   secretKey: "******"
 
 dynamodb:
   endpoint: http://localhost:4566/
-
-
-web:
-  client: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io
-  client2: https://a0f01868-b383-493a-974a-2bb4ef9d6a2b.mock.pstmn.io

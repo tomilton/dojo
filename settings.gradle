@@ -20,3 +20,5 @@ include ':web-client-defaultdata'
 project(':web-client-defaultdata').projectDir = file('./infrastructure/driven-adapters/web-client-defaultdata')
 include ':redis'
 project(':redis').projectDir = file('./infrastructure/driven-adapters/redis')
+include ':processor'
+project(':processor').projectDir = file('./infrastructure/driven-adapters/processor')

@@ -2,6 +2,7 @@ package co.com.nequi.nequiservice.account;
 
 import co.com.nequi.model.account.dto.*;
 import co.com.nequi.model.account.gateways.AccountService;
+import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.nequiservice.account.dto.*;
 import co.com.nequi.model.exceptions.AccountOperationException;
 import org.reactivecommons.utils.ObjectMapper;
@@ -67,6 +68,7 @@ public class AccountServiceImpl implements AccountService {
                 .bodyValue(unFreezeAccountRq)
                 .retrieve()
                 .onStatus(HttpStatus::is5xxServerError, resp -> this.buildAccountOperationException())
+                .onStatus(HttpStatus::is4xxClientError, resp -> this.buildAccountOperationException4xx(resp.statusCode()))
                 .bodyToMono(FinacleResponse.class)
                 .onErrorMap(throwable -> new AccountOperationException(throwable.getMessage()));
         return finacleResponse.map(response -> {
@@ -77,5 +79,9 @@ public class AccountServiceImpl implements AccountService {
 
     private Mono<AccountOperationException> buildAccountOperationException(){
         return Mono.error(new AccountOperationException("Error comunicacion finacle"));
+    }
+
+    private Mono<AccountOperationException> buildAccountOperationException4xx(Object response){
+        return Mono.error(new BusinessException(response.toString()));
     }
 }

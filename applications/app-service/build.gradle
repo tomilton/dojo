@@ -1,6 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+	implementation project(':processor')
 	implementation project(':redis')
 	implementation project(':web-client-defaultdata')
 	implementation project(':web-client')
@@ -12,7 +13,7 @@ dependencies {
     implementation project(':usecase')
     implementation project(':trace')
     implementation 'org.springframework.boot:spring-boot-starter'
-    runtimeOnly('org.springframework.boot:spring-boot-devtools')
+    //runtimeOnly('org.springframework.boot:spring-boot-devtools')
 }
 
 task explodedJar(type: Copy) {

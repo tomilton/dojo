@@ -20,11 +20,13 @@ public class TemplateEntity {
     private String protocol;
     private String host;
     private String port;
+    private String path;
     private String region;
     private String version;
 
     private List<PropertyRS> propertyRS;
     private List<PropertyRQ> propertyRQ;
+    private List<DefaultDataKeyProperty> defaultDataKeys;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("templateID")
@@ -145,6 +147,24 @@ public class TemplateEntity {
         this.propertyRQ = propertyRQ;
     }
 
+    @DynamoDbAttribute("path")
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    @DynamoDbAttribute("defaultDataKeys")
+    public List<DefaultDataKeyProperty> getDefaultDataKeys() {
+        return defaultDataKeys;
+    }
+
+    public void setDefaultDataKeys(List<DefaultDataKeyProperty> defaultDataKeys) {
+        this.defaultDataKeys = defaultDataKeys;
+    }
+
     @Override
     public String toString() {
         return "Template{" +
@@ -161,6 +181,7 @@ public class TemplateEntity {
                 ", version='" + version + '\'' +
                 ", propertyRS=" + propertyRS +
                 ", propertyRQ=" + propertyRQ +
+                ", defaultDataKeys=" + defaultDataKeys +
                 '}';
     }
 }

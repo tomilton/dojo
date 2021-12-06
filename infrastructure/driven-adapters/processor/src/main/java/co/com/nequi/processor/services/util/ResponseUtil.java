@@ -1,10 +1,9 @@
-package co.com.nequi.usecase.util;
+package co.com.nequi.processor.services.util;
 
 import co.com.nequi.model.exceptions.BusinessException;
 import co.com.nequi.model.requestmdw.RequestMdw;
 import co.com.nequi.model.responsemdw.*;
-import co.com.nequi.usecase.createcustomer.constant.Constant;
-import co.com.nequi.usecase.createcustomer.util.BuildMessageUtil;
+import org.json.JSONObject;
 import reactor.core.publisher.Mono;
 
 public class ResponseUtil {
